@@ -1,0 +1,6 @@
+Django
+psycopg[binary]
+djangorestframework
+dj-rest-auth[with_social]
+drf-spectacular
+djangorestframework-simplejwt
