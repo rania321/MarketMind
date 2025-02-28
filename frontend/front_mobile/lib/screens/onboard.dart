@@ -14,7 +14,7 @@ class _OnboardScreenState extends State<OnboardScreen> {
 
   List<AllinOnboardModel> allinonboardlist = [
     AllinOnboardModel(
-      "assets/images/design1.png",
+      "assets/images/bg22.png",
       "Easily create custom marketing campaigns with AI-generated content (text, images, videos, audio) tailored to your audience and goals",
       "Advanced Personalization",
     ),

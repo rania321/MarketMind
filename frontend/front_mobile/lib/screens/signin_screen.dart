@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front_mobile/screens/HomeScreen.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:front_mobile/screens/forget_passsword_screen.dart';
 import 'package:front_mobile/screens/signup_screen.dart';
@@ -144,7 +145,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => ForgetPasswordScreen(),
+                                  builder: (context) => ForgetPass(),
                                 ),
                               );
                             },
@@ -167,24 +168,38 @@ class _SignInScreenState extends State<SignInScreen> {
                           onPressed: () {
                             if (_formSignInKey.currentState!.validate() &&
                                 rememberPassword) {
+                              // Show a success message
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text('Processing Data'),
+                                  content:
+                                      Text('Login successful! Redirecting...'),
                                 ),
                               );
+
+                              // Navigate to the HomeScreen after a delay
+                              Future.delayed(const Duration(seconds: 2), () {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const HomePage(), // Redirect to HomeScreen
+                                  ),
+                                );
+                              });
                             } else if (!rememberPassword) {
+                              // Show an error message if "Remember me" is not checked
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                    content: Text(
-                                        'Please agree to the processing of personal data')),
+                                  content: Text('Please agree to remember me.'),
+                                ),
                               );
                             }
-                          }, 
+                          },
                           child: const Text('Sign in'),
                           style: ElevatedButton.styleFrom(
-    backgroundColor: Color(0xFF01013E), // Définir la couleur de fond du bouton
-    
-  ),
+                            backgroundColor:
+                                Color(0xFF01013E), // Button background color
+                          ),
                         ),
                       ),
                       const SizedBox(

@@ -14,8 +14,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: lightMode,
+      title: 'Marketing App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSwatch(
+          primarySwatch: Colors.blue,
+          accentColor: Colors.red, // Couleur d'accentuation rouge
+        ),
+      ),
       home: const WelcomeScreen(),
     );
   }
