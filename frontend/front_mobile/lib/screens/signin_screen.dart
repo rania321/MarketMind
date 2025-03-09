@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front_mobile/constants/colors.dart';
 import 'package:front_mobile/screens/HomeScreen.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:front_mobile/screens/forget_passsword_screen.dart';
@@ -182,7 +183,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        const HomePage(), // Redirect to HomeScreen
+                                        const HomeScreen(), // Redirect to HomeScreen
                                   ),
                                 );
                               });
@@ -195,10 +196,25 @@ class _SignInScreenState extends State<SignInScreen> {
                               );
                             }
                           },
-                          child: const Text('Sign in'),
+                          child: const Text(
+                            'Sign in',
+                            style: TextStyle(
+                              color: Colors.white, // Couleur du texte
+                              fontSize: 16, // Taille du texte
+                            ),
+                          ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor:
-                                Color(0xFF01013E), // Button background color
+                                AppColors.black, // Couleur de fond du bouton
+                            padding: const EdgeInsets.only(
+                                top: 15,
+                                bottom: 15), // Padding en haut et en bas
+                            minimumSize: const Size(double.infinity,
+                                50), // Largeur maximale et hauteur minimale
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(40), // Bordure arrondie
+                            ),
                           ),
                         ),
                       ),

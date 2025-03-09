@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front_mobile/constants/colors.dart';
 import 'package:icons_plus/icons_plus.dart';
 import 'package:front_mobile/screens/signin_screen.dart';
 import 'package:front_mobile/theme/theme.dart';
@@ -28,7 +29,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           Expanded(
             flex: 7,
             child: Container(
-              padding: const EdgeInsets.fromLTRB(25.0, 50.0, 25.0, 20.0),
+              padding: const EdgeInsets.fromLTRB(25.0, 25.0, 25.0, 20.0),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -49,7 +50,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         style: TextStyle(
                           fontSize: 30.0,
                           fontWeight: FontWeight.w900,
-                          color:  Color(0xFF01013E),
+                          color: Color(0xFF01013E),
                         ),
                       ),
                       const SizedBox(
@@ -200,11 +201,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               );
                             }
                           },
-                          child: const Text('Sign up'),
+                          child: const Text(
+                            'Sign up',
+                            style: TextStyle(
+                              color: Colors.white, // Couleur du texte
+                              fontSize: 16, // Taille du texte
+                            ),
+                          ),
                           style: ElevatedButton.styleFrom(
-    backgroundColor: Color(0xFF01013E), // Définir la couleur de fond du bouton
-    
-  ),
+                            backgroundColor:
+                                AppColors.black, // Couleur de fond du bouton
+                            padding: const EdgeInsets.only(
+                                top: 15,
+                                bottom: 15), // Padding en haut et en bas
+                            minimumSize: const Size(double.infinity,
+                                50), // Largeur maximale et hauteur minimale
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(40), // Bordure arrondie
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(
