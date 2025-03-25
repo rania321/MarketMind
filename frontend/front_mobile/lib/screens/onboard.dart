@@ -13,23 +13,22 @@ class _OnboardScreenState extends State<OnboardScreen> {
   final PageController _pageController = PageController();
 
   List<AllinOnboardModel> allinonboardlist = [
-    AllinOnboardModel(
-      "assets/images/logo1.png",
-      "Easily create custom marketing campaigns with AI-generated content (text, images, videos, audio) tailored to your audience and goals",
-      "Advanced Personalization",
-    ),
-    AllinOnboardModel(
-      "assets/images/bg22.png",
-      "Leverage predictive analytics and performance tools to optimize strategies and maximize campaign impact.",
-      "Valuable Insights",
-    ),
-    AllinOnboardModel(
-      "assets/images/bg22.png",
-      "Enjoy an intuitive interface and robust infrastructure with fast access via a dedicated REST API for measurable results",
-      "Simplicity and Efficiency",
-    ),
-  ];
-
+  AllinOnboardModel(
+    "assets/images/logo1.png",
+    "Automatically analyze customer reviews and extract actionable insights to improve your product and customer experience",
+    "Smart Review Analysis",
+  ),
+  AllinOnboardModel(
+    "assets/images/logo1.png",
+    "Get data-driven marketing strategy recommendations tailored to your audience's needs and preferences",
+    "Smart Strategy Builder",
+  ),
+  AllinOnboardModel(
+    "assets/images/logo1.png",
+    "Generate personalized marketing content (text, visuals) based on trends identified in customer feedback",
+    "AI Content Creation",
+  ),
+];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
