@@ -3,6 +3,7 @@ from pymongo import MongoClient
 from bson import ObjectId  # Import corrected from bson
 from datetime import datetime
 import os
+import re
 import pandas as pd
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
@@ -44,7 +45,7 @@ def add_product():
         "name": name,
         "category": category,
         "description": description,
-        "image": image_path,
+        "image": image_filename,
         "date_added": date_added
     }
 
@@ -265,3 +266,95 @@ def sentiment_analysis():
         sentiment_results = analyses
 
     return jsonify({"message": "Sentiment analysis completed", "sentiment_results": sentiment_results})
+
+@api_routes.route("/word_frequencies/<product_id>", methods=["GET"])
+def get_word_frequencies(product_id):
+    # Récupérer les analyses de sentiment pour ce produit
+    sentiment_data = list(sentiment_results_collection.find({"product_id": ObjectId(product_id)}))
+    
+    if not sentiment_data:
+        return jsonify({"error": "No sentiment analysis found for this product"}), 404
+    
+    # Liste des mots à exclure (stop words)
+    stop_words = {"le", "la", "les", "de", "du", "des", "un", "une", "et", "ou", "avec", "pour", "dans"}
+    
+    word_data = {
+        "positive": {},
+        "neutral": {},
+        "negative": {}
+    }
+    
+    for analysis in sentiment_data:
+        for review_analysis in analysis.get("analyses", []):
+            review_text = review_analysis["review_text"]
+            sentiment = review_analysis["sentiment"]
+            
+            words = re.findall(r'\b\w{4,}\b', review_text.lower())
+            for word in words:
+                if word not in stop_words:
+                    word_data[sentiment][word] = word_data[sentiment].get(word, 0) + 1
+    
+    # Retourner les données organisées par sentiment
+    return jsonify(word_data)
+
+@api_routes.route("/sentiment_trends/<product_id>", methods=["GET"])
+def get_sentiment_trends(product_id):
+    # Pipeline d'agrégation optimisé pour éviter les doublons
+    pipeline = [
+        {"$match": {"product_id": ObjectId(product_id)}},
+        {"$unwind": "$analyses"},
+        # Groupement par texte d'avis et date pour éliminer les doublons
+        {"$group": {
+            "_id": {
+                "review_text": "$analyses.review_text",
+                "date": {"$dateToString": {"format": "%Y-%m-%d", "date": {"$toDate": "$analyses.analysis_date_review"}}}
+            },
+            "sentiment": {"$first": "$analyses.sentiment"}
+        }},
+        # Ensuite groupement par date et sentiment
+        {"$group": {
+            "_id": {
+                "date": "$_id.date",
+                "sentiment": "$sentiment"
+            },
+            "count": {"$sum": 1}
+        }},
+        # Final groupement par date
+        {"$group": {
+            "_id": "$_id.date",
+            "sentiments": {
+                "$push": {
+                    "sentiment": "$_id.sentiment",
+                    "count": "$count"
+                }
+            }
+        }},
+        {"$sort": {"_id": 1}}  # Tri chronologique
+    ]
+    
+    results = list(sentiment_results_collection.aggregate(pipeline))
+    
+    # Formater les données pour le frontend
+    trends = {
+        "dates": [],
+        "positive": [],
+        "neutral": [],
+        "negative": []
+    }
+    
+    for result in results:
+        trends["dates"].append(result["_id"])
+        
+        # Initialiser les compteurs à 0 pour cette date
+        counts = {"positive": 0, "neutral": 0, "negative": 0}
+        
+        # Mettre à jour les compteurs avec les données réelles
+        for sentiment_data in result["sentiments"]:
+            counts[sentiment_data["sentiment"]] = sentiment_data["count"]
+        
+        # Ajouter les valeurs aux séries
+        trends["positive"].append(counts["positive"])
+        trends["neutral"].append(counts["neutral"])
+        trends["negative"].append(counts["negative"])
+    
+    return jsonify(trends)
