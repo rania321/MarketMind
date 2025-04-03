@@ -111,7 +111,12 @@ def add_reviews():
 # ➤ Obtenir les Reviews d'un Produit
 @api_routes.route("/reviews/<product_id>", methods=["GET"])
 def get_reviews(product_id):
-    reviews = list(reviews_collection.find({"product_id": product_id}, {"_id": 1, "review_text": 1, "date_added": 1}))
+    # Tri par date décroissante
+    reviews = list(reviews_collection.find(
+        {"product_id": product_id}, 
+        {"_id": 1, "review_text": 1, "date_added": 1}
+    ).sort("date_added", -1))
+    
     for review in reviews:
         review["_id"] = str(review["_id"])
     return jsonify(reviews)
@@ -299,27 +304,19 @@ def get_word_frequencies(product_id):
 
 @api_routes.route("/sentiment_trends/<product_id>", methods=["GET"])
 def get_sentiment_trends(product_id):
-    # Pipeline d'agrégation optimisé pour éviter les doublons
+    # Pipeline d'agrégation pour obtenir les pourcentages par date
     pipeline = [
         {"$match": {"product_id": ObjectId(product_id)}},
         {"$unwind": "$analyses"},
-        # Groupement par texte d'avis et date pour éliminer les doublons
+        # Groupement par date d'analyse et sentiment
         {"$group": {
             "_id": {
-                "review_text": "$analyses.review_text",
-                "date": {"$dateToString": {"format": "%Y-%m-%d", "date": {"$toDate": "$analyses.analysis_date_review"}}}
-            },
-            "sentiment": {"$first": "$analyses.sentiment"}
-        }},
-        # Ensuite groupement par date et sentiment
-        {"$group": {
-            "_id": {
-                "date": "$_id.date",
-                "sentiment": "$sentiment"
+                "date": {"$dateToString": {"format": "%Y-%m-%d", "date": {"$toDate": "$analyses.analysis_date_review"}}},
+                "sentiment": "$analyses.sentiment"
             },
             "count": {"$sum": 1}
         }},
-        # Final groupement par date
+        # Groupement par date pour calculer les totaux
         {"$group": {
             "_id": "$_id.date",
             "sentiments": {
@@ -327,9 +324,29 @@ def get_sentiment_trends(product_id):
                     "sentiment": "$_id.sentiment",
                     "count": "$count"
                 }
+            },
+            "total": {"$sum": "$count"}
+        }},
+        # Calcul des pourcentages
+        {"$project": {
+            "date": "$_id",
+            "sentiments": {
+                "$map": {
+                    "input": "$sentiments",
+                    "as": "s",
+                    "in": {
+                        "sentiment": "$$s.sentiment",
+                        "percentage": {
+                            "$multiply": [
+                                {"$divide": ["$$s.count", "$total"]},
+                                100
+                            ]
+                        }
+                    }
+                }
             }
         }},
-        {"$sort": {"_id": 1}}  # Tri chronologique
+        {"$sort": {"date": 1}}  # Tri chronologique
     ]
     
     results = list(sentiment_results_collection.aggregate(pipeline))
@@ -343,18 +360,18 @@ def get_sentiment_trends(product_id):
     }
     
     for result in results:
-        trends["dates"].append(result["_id"])
+        trends["dates"].append(result["date"])
         
-        # Initialiser les compteurs à 0 pour cette date
-        counts = {"positive": 0, "neutral": 0, "negative": 0}
+        # Initialiser les pourcentages à 0 pour cette date
+        percentages = {"positive": 0, "neutral": 0, "negative": 0}
         
-        # Mettre à jour les compteurs avec les données réelles
+        # Mettre à jour les pourcentages avec les données réelles
         for sentiment_data in result["sentiments"]:
-            counts[sentiment_data["sentiment"]] = sentiment_data["count"]
+            percentages[sentiment_data["sentiment"]] = round(sentiment_data["percentage"], 1)
         
         # Ajouter les valeurs aux séries
-        trends["positive"].append(counts["positive"])
-        trends["neutral"].append(counts["neutral"])
-        trends["negative"].append(counts["negative"])
+        trends["positive"].append(percentages["positive"])
+        trends["neutral"].append(percentages["neutral"])
+        trends["negative"].append(percentages["negative"])
     
     return jsonify(trends)

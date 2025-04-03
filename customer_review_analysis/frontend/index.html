@@ -82,11 +82,21 @@
                 </div>
 
                 <h3>Avis par produit</h3>
-                <div class="form-group">
-                    <label for="reviewProductSelect">Sélectionnez un produit</label>
-                    <select id="reviewProductSelect"></select>
+                <div class="card">
+                    <div class="form-group">
+                        <label for="reviewProductSelect">Sélectionnez un produit</label>
+                        <select id="reviewProductSelect"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="reviewDateFilter">Filtrer par date</label>
+                        <select id="reviewDateFilter">
+                            <option value="all">Toutes les dates</option>
+                            <!-- Les options de date seront ajoutées dynamiquement -->
+                        </select>
+                    </div>
+                    <div id="reviewsList" class="reviews-list"></div>
+                    <button id="loadMoreReviews" class="btn" style="display: none; margin-top: 1rem;">Voir plus</button>
                 </div>
-                <div id="reviewsList" class="reviews-list"></div>
             </div>
         </section>
 
@@ -149,14 +159,15 @@
                         </div>
                         <div id="wordcloud"></div>
                     </div> 
+
+                    <div id="sentimentDetails" class="sentiment-details"></div>
+                    <button id="showAllReviews" class="btn" style="display: none; margin-top: 1rem;">Voir tout</button>
                     <div class="trends-section">
                         <h3>Évolution des sentiments au fil du temps</h3>
                         <div class="chart-container">
                             <canvas id="trendsChart"></canvas>
                         </div>
                     </div>
-
-                    <div id="sentimentDetails" class="sentiment-details"></div>
                 </div>
             </div>
         </section>

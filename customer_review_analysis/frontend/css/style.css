@@ -521,3 +521,29 @@ body {
     height: 300px;
     position: relative;
 }
+/* Ajoutez ceci à la fin de style.css */
+#loadMoreReviews {
+    width: 100%;
+    background-color: var(--black);
+}
+
+#loadMoreReviews:hover {
+    background-color: #333;
+}
+
+.review-date-filter {
+    margin-bottom: 1rem;
+}
+
+.review-date-filter label {
+    margin-right: 10px;
+}
+/* Ajoutez à la fin de style.css */
+#showAllReviews {
+    width: 100%;
+    background-color: var(--black);
+}
+
+#showAllReviews:hover {
+    background-color: #333;
+}

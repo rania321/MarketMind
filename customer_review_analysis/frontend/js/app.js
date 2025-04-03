@@ -23,6 +23,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('reviewProductSelect').addEventListener('change', function() {
         loadReviews(this.value);
     });
+    // Modifiez l'écouteur d'événements pour le changement de produit
+document.getElementById('reviewProductSelect').addEventListener('change', function() {
+    currentReviewPage = 1;
+    loadReviews(this.value);
+});
 
     // Initialiser les graphiques
     initCharts();
@@ -36,6 +41,12 @@ const sentimentColors = {
     neutral: '#666666',
     negative: '#fe3f40'
 };
+let currentReviewPage = 1;
+const reviewsPerPage = 5;
+let allReviews = [];
+let filteredReviews = [];
+let allSentimentResults = [];
+let showingAllSentiments = false;
 
 function initTrendsChart() {
     const ctx = document.getElementById('trendsChart').getContext('2d');
@@ -88,9 +99,10 @@ function initTrendsChart() {
             scales: {
                 y: {
                     beginAtZero: true,
+                    max: 100,
                     title: {
                         display: true,
-                        text: 'Nombre d\'avis'
+                        text: 'Pourcentage (%)'
                     }
                 },
                 x: {
@@ -214,34 +226,108 @@ function addReviews() {
     });
 }
 
+// Modifiez la fonction loadReviews pour gérer le filtrage et la pagination
 function loadReviews(productId) {
-    if (!productId) return;
+    if (!productId) {
+        document.getElementById('reviewsList').innerHTML = '';
+        document.getElementById('loadMoreReviews').style.display = 'none';
+        return;
+    }
+
+    showLoading(true);
     
     fetch(`/api/reviews/${productId}`)
         .then(response => response.json())
         .then(reviews => {
-            const reviewsList = document.getElementById('reviewsList');
-            reviewsList.innerHTML = '';
-            
-            if (reviews.length === 0) {
-                reviewsList.innerHTML = '<p class="no-reviews">Aucun avis trouvé pour ce produit</p>';
-                return;
-            }
-            
-            reviews.forEach(review => {
-                const reviewItem = document.createElement('div');
-                reviewItem.className = 'review-item';
-                reviewItem.innerHTML = `
-                    <p>${review.review_text}</p>
-                    <small>Ajouté le ${review.date_added}</small>
-                `;
-                reviewsList.appendChild(reviewItem);
-            });
+            allReviews = reviews;
+            updateDateFilterOptions(reviews);
+            filterReviewsByDate('all');
         })
         .catch(error => {
             console.error('Erreur:', error);
             showAlert('Erreur lors du chargement des avis', 'error');
-        });
+        })
+        .finally(() => showLoading(false));
+}
+
+// Ajoutez cette fonction pour mettre à jour les options de filtre de date
+function updateDateFilterOptions(reviews) {
+    const dateFilter = document.getElementById('reviewDateFilter');
+    
+    // Récupérer toutes les dates uniques
+    const uniqueDates = [...new Set(reviews.map(review => review.date_added.split(' ')[0]))];
+    
+    // Vider et remplir le select
+    dateFilter.innerHTML = '<option value="all">Toutes les dates</option>';
+    uniqueDates.forEach(date => {
+        const option = document.createElement('option');
+        option.value = date;
+        option.textContent = date;
+        dateFilter.appendChild(option);
+    });
+    
+    // Ajouter l'écouteur d'événements
+    dateFilter.addEventListener('change', (e) => {
+        currentReviewPage = 1;
+        filterReviewsByDate(e.target.value);
+    });
+}
+
+// Ajoutez cette fonction pour filtrer les avis par date
+function filterReviewsByDate(dateFilter) {
+    if (dateFilter === 'all') {
+        filteredReviews = [...allReviews];
+    } else {
+        filteredReviews = allReviews.filter(review => 
+            review.date_added.startsWith(dateFilter)
+        );
+    }
+    
+    currentReviewPage = 1;
+    displayReviews();
+}
+
+// Ajoutez cette fonction pour afficher les avis paginés
+function displayReviews() {
+    const reviewsList = document.getElementById('reviewsList');
+    const loadMoreBtn = document.getElementById('loadMoreReviews');
+    
+    // Calculer les avis à afficher
+    const reviewsToShow = filteredReviews.slice(0, currentReviewPage * reviewsPerPage);
+    
+    // Afficher les avis
+    reviewsList.innerHTML = '';
+    
+    if (reviewsToShow.length === 0) {
+        reviewsList.innerHTML = '<p class="no-reviews">Aucun avis trouvé</p>';
+        loadMoreBtn.style.display = 'none';
+        return;
+    }
+    
+    reviewsToShow.forEach(review => {
+        const reviewItem = document.createElement('div');
+        reviewItem.className = 'review-item';
+        reviewItem.innerHTML = `
+            <p>${review.review_text}</p>
+            <small>Ajouté le ${review.date_added}</small>
+        `;
+        reviewsList.appendChild(reviewItem);
+    });
+    
+    // Gérer le bouton "Voir plus"
+    if (filteredReviews.length > reviewsToShow.length) {
+        loadMoreBtn.style.display = 'block';
+        loadMoreBtn.onclick = () => {
+            currentReviewPage++;
+            displayReviews();
+            // Faire défiler vers le bas pour voir les nouveaux avis
+            setTimeout(() => {
+                reviewsList.lastElementChild.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        };
+    } else {
+        loadMoreBtn.style.display = 'none';
+    }
 }
 
 function analyzeSentiment() {
@@ -251,6 +337,10 @@ function analyzeSentiment() {
         showAlert('Veuillez sélectionner un produit', 'warning');
         return;
     }
+    
+    // Réinitialiser l'affichage
+    showingAllSentiments = false;
+    document.getElementById('showAllReviews').style.display = 'none';
     
     showLoading(true);
     
@@ -263,7 +353,7 @@ function analyzeSentiment() {
         if (data.sentiment_results) {
             displaySentimentResults(data.sentiment_results);
             loadWordCloud(productId);
-            loadSentimentTrends(productId); // Charger les tendances
+            loadSentimentTrends(productId);
         } else {
             showAlert(data.error || 'Erreur lors de l\'analyse de sentiment', 'error');
         }
@@ -278,16 +368,25 @@ function analyzeSentiment() {
 /* Fonctions d'affichage des résultats */
 function displaySentimentResults(results) {
     const sentimentDetails = document.getElementById('sentimentDetails');
+    const showAllBtn = document.getElementById('showAllReviews');
+    
+    // Stocker tous les résultats
+    allSentimentResults = results;
+    
+    // Déterminer combien d'avis afficher
+    const resultsToShow = showingAllSentiments ? allSentimentResults : allSentimentResults.slice(0, 3);
+    
     sentimentDetails.innerHTML = '';
     
-    // Compter les sentiments
+    // Compter les sentiments (pour les statistiques)
     const counts = {
         positive: 0,
         neutral: 0,
         negative: 0
     };
     
-    results.forEach((result, index) => {
+    // Afficher les avis sélectionnés
+    resultsToShow.forEach((result, index) => {
         counts[result.sentiment]++;
         
         const sentimentItem = document.createElement('div');
@@ -316,11 +415,31 @@ function displaySentimentResults(results) {
         sentimentDetails.appendChild(sentimentItem);
     });
     
-    // Mettre à jour les statistiques
-    updateSentimentStats(counts);
+    // Gérer le bouton "Voir tout"/"Voir moins"
+    if (allSentimentResults.length > 3) {
+        showAllBtn.style.display = 'block';
+        showAllBtn.textContent = showingAllSentiments ? 'Voir moins' : 'Voir tout';
+        showAllBtn.onclick = () => {
+            showingAllSentiments = !showingAllSentiments;
+            displaySentimentResults(allSentimentResults); // Réafficher avec le nouvel état
+        };
+    } else {
+        showAllBtn.style.display = 'none';
+    }
     
-    // Mettre à jour le graphique
-    updateSentimentChart(counts);
+    // Mettre à jour les statistiques globales
+    updateSentimentStats({
+        positive: allSentimentResults.filter(r => r.sentiment === 'positive').length,
+        neutral: allSentimentResults.filter(r => r.sentiment === 'neutral').length,
+        negative: allSentimentResults.filter(r => r.sentiment === 'negative').length
+    });
+    
+    // Mettre à jour le graphique avec toutes les données
+    updateSentimentChart({
+        positive: allSentimentResults.filter(r => r.sentiment === 'positive').length,
+        neutral: allSentimentResults.filter(r => r.sentiment === 'neutral').length,
+        negative: allSentimentResults.filter(r => r.sentiment === 'negative').length
+    });
 }
 
 /* Fonctions de visualisation */
@@ -350,6 +469,9 @@ function initCharts() {
             }
         }
     });
+     // Initialiser le bouton "Voir tout"
+     document.getElementById('showAllReviews').style.display = 'none';
+     document.getElementById('showAllReviews').onclick = null;
 }
 
 function updateSentimentChart(counts) {
@@ -490,29 +612,28 @@ async function loadSentimentTrends(productId) {
             throw new Error("Format de données invalide");
         }
         
-        // Mettre à jour le graphique
+        // Mettre à jour le graphique avec les pourcentages
         trendsChart.data.labels = trendsData.dates;
         trendsChart.data.datasets[0].data = trendsData.positive;
         trendsChart.data.datasets[1].data = trendsData.neutral;
         trendsChart.data.datasets[2].data = trendsData.negative;
-        trendsChart.update();
         
-        // Journalisation pour débogage (à retirer en production)
-        console.log("Données de tendances chargées:", {
-            dates: trendsData.dates,
-            counts: {
-                positive: trendsData.positive.reduce((a, b) => a + b, 0),
-                neutral: trendsData.neutral.reduce((a, b) => a + b, 0),
-                negative: trendsData.negative.reduce((a, b) => a + b, 0)
+        // Mettre à jour les options pour afficher des pourcentages
+        trendsChart.options.scales.y.max = 100;
+        trendsChart.options.scales.y.title.text = 'Pourcentage (%)';
+        trendsChart.options.plugins.tooltip.callbacks = {
+            label: function(context) {
+                return `${context.dataset.label}: ${context.raw}%`;
             }
-        });
+        };
+        
+        trendsChart.update();
         
     } catch (error) {
         console.error("Erreur lors du chargement des tendances:", error);
         showAlert('Erreur lors du chargement des tendances: ' + error.message, 'error');
     }
 }
-
 /* Fonctions utilitaires */
 function showAlert(message, type) {
     const alert = document.createElement('div');
