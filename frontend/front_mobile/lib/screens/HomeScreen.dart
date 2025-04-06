@@ -13,42 +13,36 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  final String _appSlogan = "From Feedback to Fortune - AI-Powered Review Magic";
-  bool _isHovered = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-    title: "BrandBoost",
-    showNotificationIcon: true, // Par défaut true
-    onNotificationPressed: () {
-      // Votre logique de notification
-    },
-  ),
+        title: "MarktMind",
+        showNotificationIcon: true,
+        onNotificationPressed: () {
+          // Notification logic
+        },
+      ),
       drawer: CustomDrawer(),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
             // Hero Section
             _buildHeroSection(),
-            SizedBox(height: 24),
-
-            // Value Proposition Cards
-            _buildValuePropositions(),
-            SizedBox(height: 24),
-
-            // Key Metrics
-            _buildKeyMetricsSection(),
-            SizedBox(height: 24),
-
-            // Recent Insights
-            _buildRecentInsightsSection(),
             
-            // Testimonial
-            _buildTestimonialSection(),
+            // Features Section
+            _buildFeaturesSection(),
+            
+            // How It Works Section
+            _buildDemoSection(),
+            
+            // Testimonials Section
+            _buildTestimonialsSection(),
+            
+            // CTA Section
+            _buildCtaSection(),
           ],
         ),
       ),
@@ -61,333 +55,379 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildHeroSection() {
     return Container(
+      padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [AppColors.blue.withOpacity(0.1), Colors.white],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
+          colors: [AppColors.blue, AppColors.blue.withOpacity(0.8)],
         ),
-        borderRadius: BorderRadius.circular(12),
       ),
-      padding: EdgeInsets.all(20),
       child: Column(
         children: [
           Image.asset(
-      'assets/images/logo1.png',
-      height: 100, // Taille augmentée (ajustez selon vos besoins)
-      width: 100, // Conserver les proportions
-      fit: BoxFit.contain,
-    ),
-          SizedBox(height: 16),
+            'assets/images/logo1.png',
+            height: 100,
+            width: 100,
+            fit: BoxFit.contain,
+          ),
+          const SizedBox(height: 20),
           Text(
-            "Turn Customer Voices\nInto Marketing Gold",
+            "Unlock the True Voice of Your Customers",
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,
-              color: AppColors.blue,
+              color: Colors.white,
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 16),
           Text(
-            "AI analyzes reviews, generates content, and recommends strategies\nwhile you focus on growth",
+            "MarktMind analyzes customer feedback to deliver actionable insights with AI-powered sentiment analysis.",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: AppColors.black),
-          ),
-          SizedBox(height: 20),
-          FilledButton(
-            onPressed: () {},
-            style: FilledButton.styleFrom(
-              backgroundColor: AppColors.blue,
-              padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.white.withOpacity(0.9),
             ),
-            child: Text("Launch Analysis", style: TextStyle(fontSize: 18)),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildValuePropositions() {
-  return Column(
-    children: [
-      Text(
-        "Why Marketers Love Us",
-        style: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-          color: AppColors.black,
-        ),
-      ),
-      SizedBox(height: 16),
-      Wrap(
-        spacing: 16,
-        runSpacing: 16,
-        children: [
-          _buildValueCard(
-            Icons.insights,
-            "Deep Insights",
-            "Spot hidden customer needs and trends",
-            AppColors.blue
-          ),
-          _buildValueCard(
-            Icons.rocket_launch,
-            "AI Strategies",
-            "Data-driven marketing plans in minutes",
-            AppColors.red
-          ),
-          _buildValueCard(
-            Icons.content_copy,
-            "Auto Content",
-            "Generate posts, ads, and emails instantly",
-            AppColors.blue
-          ),
-          _buildLogoCard(), // Nouvelle carte spéciale pour le logo
-        ],
-      ),
-    ],
-  );
-}
-
-Widget _buildLogoCard() {
-  return Container(
-    width: MediaQuery.of(context).size.width * 0.42,
-    height: 180, // Même hauteur que les autres cartes
-    alignment: Alignment.center, // Centrage du logo
-    child: Image.asset(
-      'assets/images/logo3.png',
-      height: 250, // Taille augmentée (ajustez selon vos besoins)
-      width: 250, // Conserver les proportions
-      fit: BoxFit.contain,
-    ),
-  );
-}
-
-// Conservez votre _buildValueCard existant sans modification
-  Widget _buildValueCard(dynamic icon, String title, String desc, Color color) {
-  return Container(
-    width: MediaQuery.of(context).size.width * 0.42,
-    child: Card(
-      elevation: 3,
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            if (icon is IconData)
-              Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, size: 30, color: color),
-              )
-            else if (icon is String)
-              Image.asset(
-                icon,
-                height: 100, // Taille ajustée pour l'équilibre visuel
-                width: 100,
-                fit: BoxFit.contain,
-              ),
-            SizedBox(height: 12),
-            Text(
-              title,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            SizedBox(height: 8),
-            Text(
-              desc,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-
-
-
-
-
-  Widget _buildKeyMetricsSection() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        "Your Performance Dashboard",
-        style: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-          color: AppColors.black,
-        ),
-      ),
-      SizedBox(height: 16),
-      LayoutBuilder(
-        builder: (context, constraints) {
-          return GridView.count(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            mainAxisSpacing: 12,
-            crossAxisSpacing: 12,
-            childAspectRatio: constraints.maxWidth > 400 ? 1.1 : 0.9,
-            padding: EdgeInsets.only(bottom: 8), // Espace supplémentaire
+          const SizedBox(height: 30),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildMetricCard("1,892", "Reviews Analyzed", Icons.reviews, AppColors.blue),
-              _buildMetricCard("4.6", "Avg. Rating", Icons.star, AppColors.red),
-              _buildMetricCard("83%", "Positive", Icons.sentiment_satisfied, AppColors.blue),
-              _buildMetricCard("12", "Strategies", Icons.lightbulb, AppColors.red),
-            ],
-          );
-        },
-      ),
-    ],
-  );
-}
-
-Widget _buildMetricCard(String value, String label, IconData icon, Color color) {
-  return Card(
-    elevation: 2,
-    margin: EdgeInsets.zero, // Supprime les marges par défaut
-    child: Padding(
-      padding: EdgeInsets.all(12), // Réduit le padding
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 28, color: color), // Taille d'icône réduite
-          SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 22, // Taille de police réduite
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-          SizedBox(height: 4),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13, // Taille de police réduite
-              overflow: TextOverflow.visible,
-            ),
-          ),
-        ],
-      ),
+              ElevatedButton(
+  onPressed: () {},
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.white,
+    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(4),
     ),
-  );
-}
-
-  Widget _buildRecentInsightsSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "Latest Discoveries",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColors.black,
+  ),
+  child: Text(
+    "Try Analysis",
+    style: TextStyle(
+      color: AppColors.blue,
+      fontSize: 16,
+    ),
+  ),
+),
+              const SizedBox(width: 16),
+              OutlinedButton(
+                onPressed: () {},
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Colors.white),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                child: Text(
+                  "Learn More",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
               ),
-            ),
-            TextButton(
-              onPressed: () {},
-              child: Text("View All", style: TextStyle(color: AppColors.blue)),
-            ),
-          ],
-        ),
-        SizedBox(height: 12),
-        Card(
-          elevation: 2,
-          child: ListTile(
-            leading: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.blue.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.trending_up, color: AppColors.blue),
-            ),
-            title: Text("Price Sensitivity Detected"),
-            subtitle: Text("Customers mention 'expensive' 23% more this month"),
-            trailing: Icon(Icons.chevron_right),
+            ],
           ),
-        ),
-        SizedBox(height: 8),
-        Card(
-          elevation: 2,
-          child: ListTile(
-            leading: Container(
-              padding: EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.red.withOpacity(0.2),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(Icons.campaign, color: AppColors.red),
-            ),
-            title: Text("Promotion Opportunity"),
-            subtitle: Text("Bundle suggestions increased 40% in reviews"),
-            trailing: Icon(Icons.chevron_right),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTestimonialSection() {
-    return Container(
-      margin: EdgeInsets.only(top: 24),
-      padding: EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.blue.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Icon(Icons.format_quote, size: 30, color: AppColors.blue),
-          SizedBox(height: 16),
-          Text(
-            "BrandBoost helped us increase conversion by 32% by identifying pain points we completely missed in customer feedback.",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-          ),
-          SizedBox(height: 16),
-          Text(
-            "- Sarah K., Marketing Director",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8),
-          RatingBar(rating: 5, color: AppColors.blue),
         ],
       ),
     );
   }
-}
 
-// Add this widget class for the rating stars
-class RatingBar extends StatelessWidget {
-  final int rating;
-  final Color color;
-  
-  const RatingBar({super.key, required this.rating, required this.color});
+  Widget _buildFeaturesSection() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+      color: Colors.grey[50],
+      child: Column(
+        children: [
+          Text(
+            "Why Choose MarktMind?",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: AppColors.black,
+            ),
+          ),
+          const SizedBox(height: 40),
+          Wrap(
+            spacing: 20,
+            runSpacing: 20,
+            alignment: WrapAlignment.center,
+            children: [
+              _buildFeatureCard(
+                Icons.analytics,
+                "Accurate Insights",
+                "Our AI classifies reviews with 95% accuracy, identifying positive, neutral, and negative sentiments.",
+              ),
+              _buildFeatureCard(
+                Icons.cloud_upload,
+                "Easy Integration",
+                "Import data from CSV/Excel or connect directly to e-commerce platforms like Shopify or Amazon.",
+              ),
+              _buildFeatureCard(
+                Icons.trending_up,
+                "Trend Tracking",
+                "Monitor sentiment trends over time to measure the impact of product improvements.",
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(5, (index) => 
-        Icon(
-          index < rating ? Icons.star : Icons.star_border,
-          color: color,
-          size: 20,
+  Widget _buildFeatureCard(IconData icon, String title, String description) {
+    return Container(
+      width: 300,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            size: 40,
+            color: AppColors.blue,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            description,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDemoSection() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 20),
+      child: Column(
+        children: [
+          const SizedBox(height: 20),
+          Text(
+            "How It Works",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: AppColors.black,
+            ),
+          ),
+          const SizedBox(height: 40),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildStep("1. Upload customer reviews or connect your platform"),
+                    _buildStep("2. Analyze sentiments automatically with AI"),
+                    _buildStep("3. Visualize results with interactive charts"),
+                    _buildStep("4. Act on data-driven recommendations"),
+                    const SizedBox(height: 30),
+                    ElevatedButton(
+                      onPressed: () {},
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.blue,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      child: Text(
+                        "See Demo",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Image.asset(
+                    'assets/images/logo2.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStep(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "• ",
+            style: TextStyle(fontSize: 20),
+          ),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 16,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTestimonialsSection() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 20),
+      color: Colors.grey[50],
+      child: Column(
+        children: [
+          Text(
+            "Trusted by Businesses",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: AppColors.black,
+            ),
+          ),
+          const SizedBox(height: 40),
+          Wrap(
+            spacing: 20,
+            runSpacing: 20,
+            alignment: WrapAlignment.center,
+            children: [
+              _buildTestimonialCard(
+                "MarktMind transformed how we analyze feedback. The insights are invaluable!",
+                "Sarah, Product Manager",
+              ),
+              _buildTestimonialCard(
+                "Simple yet powerful. We use it to prioritize product upgrades.",
+                "Pierre, CEO of TechStart",
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTestimonialCard(String quote, String author) {
+    return Container(
+      width: 350,
+      padding: const EdgeInsets.all(30),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.format_quote,
+            size: 30,
+            color: AppColors.blue,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            quote,
+            style: TextStyle(
+              fontSize: 16,
+              fontStyle: FontStyle.italic,
+              height: 1.6,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            "— $author",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.right,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCtaSection() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [AppColors.blue, AppColors.blue.withOpacity(0.8)],
         ),
+      ),
+      child: Column(
+        children: [
+          Text(
+            "Ready to Discover What Your Customers Really Think?",
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 30),
+          ElevatedButton(
+            onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            child: Text(
+              "Start Analyzing Now",
+              style: TextStyle(
+                color: AppColors.blue,
+                fontSize: 18,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

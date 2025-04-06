@@ -9,11 +9,38 @@ CORS(app)  # Enable CORS for all routes
 # Register Blueprint
 app.register_blueprint(api_routes, url_prefix="/api")
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Route to serve images
 @app.route('/api/uploads/images/<filename>')
 def serve_image(filename):
     uploads_dir = os.path.join(os.path.dirname(__file__), 'uploads', 'images')
     return send_from_directory(uploads_dir, filename)
+
+
+
+
+
+
+
+
 
 # Serve frontend
 @app.route('/')

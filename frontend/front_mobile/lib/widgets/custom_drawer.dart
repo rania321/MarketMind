@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:front_mobile/screens/ProductScreen.dart';
 import 'package:front_mobile/screens/signin_screen.dart';
 import '../constants/colors.dart';
 
@@ -75,6 +76,14 @@ class CustomDrawer extends StatelessWidget {
           icon: Icons.dashboard,
           text: "Dashboard",
           onTap: () => _navigateTo(context, '/home'),
+        ),
+         _createDrawerItem(
+          icon: Icons.shopping_bag,
+          text: "Products",
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ProductScreen()),
+          ),
         ),
         _createDrawerItem(
           icon: Icons.analytics,
