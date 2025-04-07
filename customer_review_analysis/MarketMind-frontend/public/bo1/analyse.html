@@ -42,19 +42,6 @@
                 </div>
 
                 <div id="analysisResults" class="analysis-results">
-                    <!-- Nouvelle section pour les infos du produit -->
-                    <div id="productInfoCard" class="card" style="display: none;">
-                        <div class="product-info-container">
-                            <div class="product-image">
-                                <img id="productImage" src="" alt="Product Image">
-                            </div>
-                            <div class="product-details">
-                                <h3 id="productName"></h3>
-                                <span id="productCategory" class="category"></span>
-                            </div>
-                        </div>
-                    </div>
-                    
                     <h3>Résultats d'analyse</h3>
                     
                     <div class="analytics-row">
@@ -80,12 +67,6 @@
                             <canvas id="sentimentChart"></canvas>
                         </div>
                     </div>
-                    <div class="trends-section">
-                        <h3>Évolution des sentiments au fil du temps</h3>
-                        <div class="chart-container">
-                            <canvas id="trendsChart"></canvas>
-                        </div>
-                    </div>
                     
                     <div class="wordcloud-section">
                         <h3>Mots-clés fréquents</h3>
@@ -108,7 +89,12 @@
 
                     <div id="sentimentDetails" class="sentiment-details"></div>
                     <button id="showAllReviews" class="btn" style="display: none; margin-top: 1rem;">Voir tout</button>
-                   
+                    <div class="trends-section">
+                        <h3>Évolution des sentiments au fil du temps</h3>
+                        <div class="chart-container">
+                            <canvas id="trendsChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

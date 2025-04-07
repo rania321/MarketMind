@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>MarktMind - Customer Sentiment Analysis</title>
+        <link rel="stylesheet" href="css/style.css">
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"
+            rel="stylesheet">
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <style>
+        /* Hero Section Styles */
+        .hero {
+            background: linear-gradient(135deg, #04a4ed);
+            color: white;
+            padding: 5rem 0;
+            text-align: center;
+        }
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        /* Button Styles */
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn.primary {
+            background-color: white;
+            color: #04a4ed;
+        }
+        .btn.secondary {
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+        .btn.primary:hover {
+            background-color: #f0f0f0;
+        }
+        .btn.secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .btn.large {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 4rem 0;
+            background-color: #f9f9f9;
+        }
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2rem;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .feature-card:hover {
+    transform: translateY(-5px);
+}
+        .feature-card i {
+            font-size: 2.5rem;
+            color: #04a4ed;
+            margin-bottom: 1rem;
+        }
+        .feature-card h3 {
+            margin-bottom: 1rem;
+        }
+
+        /* Demo Section */
+        .demo-section {
+            padding: 4rem 0;
+        }
+        .demo-content {
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+        .demo-text {
+            flex: 1;
+        }
+        .demo-image {
+            flex: 1;
+        }
+        .logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logo-img {
+    height: 40px;
+}
+
+.logo-text {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.logo-text span {
+    color: var(--blue);
+}
+        .steps {
+            margin: 2rem 0;
+            padding-left: 1.5rem;
+        }
+        .steps li {
+            margin-bottom: 1rem;
+        }
+        .demo-image {
+    flex: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.demo-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+        /* Testimonials */
+        .testimonials-section {
+            padding: 4rem 0;
+            background-color: #f9f9f9;
+        }
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .testimonial-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .quote {
+            font-style: italic;
+            margin-bottom: 1rem;
+        }
+        .author {
+            font-weight: 500;
+            text-align: right;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 4rem 0;
+            text-align: center;
+            background: #04a4ed;
+            color: white;
+        }
+        .cta-section h2 {
+            margin-bottom: 2rem;
+        }
+
+        /* Footer */
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .footer-brand .logo {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .footer-links h4, 
+        .footer-contact h4 {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        .footer-links ul {
+            list-style: none;
+            padding: 0;
+        }
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+        .footer-links a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+        }
+    </style>
+    </head>
+    <body>
+        <header class="header">
+            <div class="container">
+                <div class="logo-container">
+                    <!-- <img src="assets/images/logo.png" alt="MarktMind Logo" class="logo-img"> -->
+                    <h1 class="logo-text">Markt<span>Mind</span></h1>
+                </div>
+                <nav class="nav">
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="produit.html">Products</a></li>
+                        <li><a href="avis.html">Reviews</a></li>
+                        <li><a href="analyse.html">Analysis</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <main class="main">
+            <!-- Hero Section -->
+            <section class="hero">
+                <div class="container">
+                    <h2>Unlock the True Voice of Your Customers</h2>
+                    <p>MarktMind analyzes customer feedback to deliver
+                        actionable insights with AI-powered sentiment
+                        analysis.</p>
+                    <div class="cta-buttons">
+                        <a href="analyse.html" class="btn primary">Try
+                            Analysis</a>
+                        <a href="#features" class="btn secondary">Learn More</a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Section -->
+            <section id="features" class="features-section">
+                <div class="container">
+                    <h2 class="section-title">Why Choose MarktMind?</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <i class="fas fa-chart-pie"></i>
+                            <h3>Accurate Insights</h3>
+                            <p>Our AI classifies reviews with 95% accuracy,
+                                identifying positive, neutral, and negative
+                                sentiments.</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <h3>Easy Integration</h3>
+                            <p>Import data from CSV/Excel or connect directly to
+                                e-commerce platforms like Shopify or Amazon.</p>
+                        </div>
+                        <div class="feature-card">
+                            <i class="fas fa-clock"></i>
+                            <h3>Trend Tracking</h3>
+                            <p>Monitor sentiment trends over time to measure the
+                                impact of product improvements.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Demo Section -->
+            <section class="demo-section">
+                <div class="container">
+                    <div class="demo-content">
+                        <div class="demo-text">
+                            <h2>How It Works</h2>
+                            <ol class="steps">
+                                <li><strong>Upload</strong> customer reviews or
+                                    connect your platform</li>
+                                <li><strong>Analyze</strong> sentiments
+                                    automatically with AI</li>
+                                <li><strong>Visualize</strong> results with
+                                    interactive charts and word clouds</li>
+                                <li><strong>Act</strong> on data-driven
+                                    recommendations</li>
+                            </ol>
+                            <a href="analyse.html" class="btn primary">See
+                                Demo</a>
+                        </div>
+                        <div class="demo-image">
+                            <img src="assets/images/logo2.png"
+                                alt="MarktMind Dashboard Preview">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Testimonials -->
+            <section class="testimonials-section">
+                <div class="container">
+                    <h2 class="section-title">Trusted by Businesses</h2>
+                    <div class="testimonials-grid">
+                        <div class="testimonial-card">
+                            <div
+                                class="quote">"MarktMind transformed how we analyze feedback. The insights are invaluable!"</div>
+                            <div class="author">— Sarah, Product Manager</div>
+                        </div>
+                        <div class="testimonial-card">
+                            <div
+                                class="quote">"Simple yet powerful. We use it to prioritize product upgrades."</div>
+                            <div class="author">— Pierre, CEO of TechStart</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA Section -->
+            <section class="cta-section">
+                <div class="container">
+                    <h2>Ready to Discover What Your Customers Really Think?</h2>
+                    <a href="analyse.html" class="btn primary large">Start
+                        Analyzing Now</a>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <div class="logo-container">
+                            <!-- <img src="assets/images/logo.png"alt="MarktMind Logo" class="logo-img"> -->
+                            <h3 class="logo-text">Markt<span>Mind</span></h3>
+                        </div>
+                        <p>AI-powered sentiment analysis for modern
+                            businesses.</p>
+                    </div>
+                    <div class="footer-links">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="products.html">Products</a></li>
+                            <li><a href="reviews.html">Reviews</a></li>
+                            <li><a href="analyse.html">Analysis</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-contact">
+                        <h4>Contact Us</h4>
+                        <p><i class="fas fa-envelope"></i>
+                            contact@marktmind.com</p>
+                        <p><i class="fas fa-phone"></i> +1 (123) 456-7890</p>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2023 MarktMind. All rights reserved.</p>
+                </div>
+            </div>
+        </footer>
+
+        <script src="js/app.js"></script>
+    </body>
+</html>

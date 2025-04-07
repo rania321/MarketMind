@@ -131,8 +131,6 @@ function loadProducts() {
                         const option = document.createElement('option');
                         option.value = product._id;
                         option.textContent = product.name;
-                        option.dataset.category = product.category;
-                        option.dataset.image = product.image;
                         select.appendChild(option);
                     }
                 });
@@ -330,26 +328,11 @@ function analyzeSentiment() {
     if (!analysisProductSelect) return;
     
     const productId = analysisProductSelect.value;
-    const selectedOption = analysisProductSelect.options[analysisProductSelect.selectedIndex];
-    const productName = selectedOption.textContent;
-    const productCategory = selectedOption.dataset.category;
-    const productImage = selectedOption.dataset.image;
     
     if (!productId) {
         showAlert('Veuillez sélectionner un produit', 'warning');
         return;
     }
-    
-    // Afficher les infos du produit
-    const productInfoCard = document.getElementById('productInfoCard');
-    const productImageEl = document.getElementById('productImage');
-    const productNameEl = document.getElementById('productName');
-    const productCategoryEl = document.getElementById('productCategory');
-    
-    productImageEl.src = productImage ? `/api/uploads/images/${productImage}` : '';
-    productNameEl.textContent = productName;
-    productCategoryEl.textContent = productCategory;
-    productInfoCard.style.display = 'block';
     
     showingAllSentiments = false;
     const showAllBtn = document.getElementById('showAllReviews');
