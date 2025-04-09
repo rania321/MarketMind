@@ -18,7 +18,7 @@ def serve_image(filename):
 # Serve frontend
 @app.route('/')
 def serve_frontend():
-    return send_from_directory('../frontend', 'index.html')
+    return send_from_directory('../frontend', 'homeAnalyseBO1.html')
 
 # Serve static files
 @app.route('/<path:path>')

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarktMind - Analyse de Sentiment</title>
+    <title>MarktMind - Sentiment Analysis</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -29,20 +29,22 @@
     <main class="main">
         <section id="analysis" class="section">
             <div class="container">
-                <h2>Analyse de Sentiment</h2>
+                <h2>Sentiment Analysis</h2>
                 <div class="card">
-                    <h3>Lancer une analyse</h3>
+                    <h3>Run Analysis</h3>
                     <form id="sentimentAnalysisForm" class="form">
                         <div class="form-group">
-                            <label for="analysisProductSelect">Produit</label>
-                            <select id="analysisProductSelect" required></select>
+                            <label for="analysisProductSelect">Product</label>
+                            <select id="analysisProductSelect" required>
+                                <option value="">Select a product</option>
+                            </select>
                         </div>
-                        <button type="submit" class="btn">Analyser</button>
+                        <button type="submit" class="btn">Analyze</button>
                     </form>
                 </div>
 
                 <div id="analysisResults" class="analysis-results">
-                    <!-- Nouvelle section pour les infos du produit -->
+                    <!-- Product info section -->
                     <div id="productInfoCard" class="card" style="display: none;">
                         <div class="product-info-container">
                             <div class="product-image">
@@ -55,23 +57,23 @@
                         </div>
                     </div>
                     
-                    <h3>Résultats d'analyse</h3>
+                    <h3>Analysis Results</h3>
                     
                     <div class="analytics-row">
                         <div class="sentiment-stats">
                             <div class="stat positive">
                                 <span class="count">0</span>
-                                <span>Positif</span>
+                                <span>Positive</span>
                                 <div class="percentage" id="positivePercent">0%</div>
                             </div>
                             <div class="stat neutral">
                                 <span class="count">0</span>
-                                <span>Neutre</span>
+                                <span>Neutral</span>
                                 <div class="percentage" id="neutralPercent">0%</div>
                             </div>
                             <div class="stat negative">
                                 <span class="count">0</span>
-                                <span>Négatif</span>
+                                <span>Negative</span>
                                 <div class="percentage" id="negativePercent">0%</div>
                             </div>
                         </div>
@@ -81,34 +83,33 @@
                         </div>
                     </div>
                     <div class="trends-section">
-                        <h3>Évolution des sentiments au fil du temps</h3>
+                        <h3>Sentiment Trends Over Time</h3>
                         <div class="chart-container">
                             <canvas id="trendsChart"></canvas>
                         </div>
                     </div>
                     
                     <div class="wordcloud-section">
-                        <h3>Mots-clés fréquents</h3>
+                        <h3>Frequent Keywords</h3>
                         <div class="sentiment-legend">
                             <div class="legend-item">
                                 <span class="legend-color positive"></span>
-                                <span>Positif</span>
+                                <span>Positive</span>
                             </div>
                             <div class="legend-item">
                                 <span class="legend-color neutral"></span>
-                                <span>Neutre</span>
+                                <span>Neutral</span>
                             </div>
                             <div class="legend-item">
                                 <span class="legend-color negative"></span>
-                                <span>Négatif</span>
+                                <span>Negative</span>
                             </div>
                         </div>
                         <div id="wordcloud"></div>
                     </div> 
 
                     <div id="sentimentDetails" class="sentiment-details"></div>
-                    <button id="showAllReviews" class="btn" style="display: none; margin-top: 1rem;">Voir tout</button>
-                   
+                    <button id="showAllReviews" class="btn" style="display: none; margin-top: 1rem;">View All</button>
                 </div>
             </div>
         </section>

@@ -1,32 +1,30 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-
-import Header from "./components/Header"
-import Footer from "./components/Footer"
-import Home from "./components/Home"
-import Login from "./components/Login"
-import Register from "./components/Register"
-import Bo1ProductsPage from './bo1/pages/ProductsPage';
-import Bo1AnalysisPage from './bo1/pages/AnalysisPage';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Layout from "./components/layout/Layout";
+import HomePage from "./pages/HomePage";
+import ProductsPage from "./pages/ProductsPage";
+import ReviewsPage from "./pages/ReviewsPage";
+import AnalysisPage from "./pages/AnalysisPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import { AuthProvider } from "./context/AuthContext"; // Utilisez le chemin existant
 
 function App() {
   return (
-    <Router>
-      <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-         {/* Routes BO1 - Conserve le header/footer existant */}
-         <Route path="/bo1/products" element={<Bo1ProductsPage />} />
-        {/* <Route path="/bo1/analysis" element={<Bo1AnalysisPage />} />
-        <Route path="/bo1/reviews" element={<Bo1ReviewsPage />} /> */}
-
-      </Routes>
-      <Footer />
-    </Router>
-  )
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/" element={<Layout />}>
+            <Route index element={<HomePage />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="reviews" element={<ReviewsPage />} />
+            <Route path="analysis" element={<AnalysisPage />} />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
+  );
 }
 
-export default App
-
+export default App;
