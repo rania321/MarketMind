@@ -104,6 +104,7 @@ body {
     color: var(--black);
 }
 
+
 .btn {
     display: inline-block;
     background-color: var(--blue);
@@ -650,5 +651,663 @@ body {
     .product-info-container {
         flex-direction: column;
         text-align: center;
+    }
+}
+
+/* Ajoutez ces styles à la fin de votre fichier CSS */
+
+/* Analysis Tabs */
+.analysis-tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-weight: 500;
+    color: #666;
+    transition: all 0.3s;
+}
+
+.tab-btn:hover {
+    color: var(--blue);
+}
+
+.tab-btn.active {
+    color: var(--blue);
+    border-bottom-color: var(--blue);
+}
+
+.tab-content {
+    margin-top: 20px;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Radio Group */
+.radio-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.radio-group input[type="radio"] {
+    display: none;
+}
+
+.radio-group label {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.radio-group input[type="radio"]:checked + label {
+    background-color: var(--blue);
+    color: white;
+    border-color: var(--blue);
+}
+
+/* Product Meta */
+.product-meta {
+    display: flex;
+    gap: 15px;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.product-meta i {
+    margin-right: 5px;
+    color: var(--blue);
+}
+
+/* Topic Details */
+.topic-details {
+    flex: 1;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.topic-item {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.topic-item:last-child {
+    border-bottom: none;
+}
+
+.topic-name {
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+.topic-progress {
+    height: 8px;
+    background: #f0f0f0;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    overflow: hidden;
+}
+
+.topic-progress-bar {
+    height: 100%;
+    background: var(--blue);
+    border-radius: 4px;
+}
+
+.topic-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+/* Confidence Meter */
+.confidence-meter {
+    margin-top: 20px;
+}
+
+.confidence-meter label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.meter {
+    height: 10px;
+    background: #f0f0f0;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.confidence-level {
+    height: 100%;
+    background: var(--blue);
+    transition: width 0.5s ease-out;
+}
+
+/* Keywords Table */
+.keywords-table {
+    margin-top: 30px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.keywords-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.keywords-table th, 
+.keywords-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.keywords-table th {
+    background: #f9f9f9;
+    font-weight: 500;
+}
+
+.keywords-table tr:hover {
+    background: #f5f5f5;
+}
+
+.keywords-table .positive {
+    color: var(--blue);
+}
+
+.keywords-table .neutral {
+    color: #666;
+}
+
+.keywords-table .negative {
+    color: var(--red);
+}
+
+/* Trends Controls */
+.trends-controls {
+    margin-top: 15px;
+    text-align: right;
+}
+
+.trends-controls select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .analysis-tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 5px;
+    }
+    
+    .tab-btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .analytics-row {
+        flex-direction: column;
+    }
+    
+    .topic-details {
+        margin-top: 20px;
+    }
+    
+    .keywords-table th, 
+    .keywords-table td {
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+}
+
+/* ANALYTICS DASHBOARD STYLES */
+
+/* Dashboard Layout */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.dashboard-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.card.full-width {
+    grid-column: span 12;
+}
+
+.card:not(.full-width) {
+    grid-column: span 6;
+}
+
+.card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.card-header h3 i {
+    margin-right: 10px;
+    color: var(--blue);
+}
+
+.card-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Product Info Panel */
+.info-panel {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.panel-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.panel-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.last-updated {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.panel-body {
+    padding: 20px;
+    display: flex;
+    gap: 20px;
+}
+
+.product-image-container {
+    width: 120px;
+    height: 120px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.product-image-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.product-meta {
+    flex: 1;
+}
+
+.product-meta h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.3rem;
+}
+
+.category-badge {
+    display: inline-block;
+    background: #f0f0f0;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.metric-card {
+    background: #f9f9f9;
+    border-radius: 6px;
+    padding: 12px;
+    text-align: center;
+}
+
+.metric-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.metric-value.positive {
+    color: var(--blue);
+}
+
+.metric-value.neutral {
+    color: #666;
+}
+
+.metric-value.negative {
+    color: var(--red);
+}
+
+.metric-label {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+/* Chart Containers */
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+/* Table Styles */
+.table-responsive {
+    overflow-x: auto;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table th {
+    background: #f5f5f5;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.data-table td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 0.9rem;
+}
+
+.data-table tr:hover {
+    background: #f9f9f9;
+}
+
+.table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.table-pagination {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Form Elements */
+.select-enhanced {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    font-size: 0.9rem;
+    min-width: 200px;
+}
+
+.select-small {
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: white;
+    font-size: 0.8rem;
+}
+
+.search-input {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: 200px;
+}
+
+/* Buttons */
+.btn-primary {
+    background: var(--blue);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn-primary:hover {
+    background: #0388c4;
+}
+
+.btn-primary i {
+    margin-right: 8px;
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.btn-icon:hover {
+    background: #f0f0f0;
+    color: #333;
+}
+
+/* Word Cloud */
+#wordcloud {
+    height: 300px;
+    position: relative;
+    text-align: center;
+}
+
+.word {
+    position: absolute;
+    display: inline-block;
+    transition: all 0.3s;
+    cursor: default;
+    font-weight: 500;
+    line-height: 1;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.word.positive {
+    color: var(--blue);
+}
+
+.word.neutral {
+    color: #666;
+}
+
+.word.negative {
+    color: var(--red);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .card:not(.full-width) {
+        grid-column: span 12;
+    }
+    
+    .panel-body {
+        flex-direction: column;
+    }
+    
+    .product-image-container {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1/1;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* KPI Cards */
+.kpi-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.kpi-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px);
+}
+
+.kpi-value {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.kpi-value.positive {
+    color: #04a4ed;
+}
+
+.kpi-value.neutral {
+    color: #666666;
+}
+
+.kpi-value.negative {
+    color: #fe3f40;
+}
+
+.kpi-label {
+    font-size: 14px;
+    color: #666;
+}
+
+.kpi-icon {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    font-size: 40px;
+    opacity: 0.1;
+    color: #333;
+}
+
+/* Chart improvements */
+.chart-summary {
+    margin-right: 20px;
+    font-size: 14px;
+    color: #666;
+}
+
+.chart-summary span {
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .kpi-container {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .kpi-container {
+        grid-template-columns: 1fr;
     }
 }
