@@ -4,23 +4,61 @@ from bson import ObjectId  # Import corrected from bson
 from datetime import datetime
 import os
 import re
+from transformers import CamembertTokenizer
 import pandas as pd
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 from config import products_collection, reviews_collection, sentiment_results_collection, IMAGE_FOLDER, CSV_FOLDER
+from flask import Blueprint, request, jsonify
+from pymongo import MongoClient
+from bson import ObjectId
+from datetime import datetime
+import os
+import re
+import pandas as pd
+import torch
+from transformers import (
+    AutoModelForSequenceClassification, 
+    AutoTokenizer,
+    pipeline
+)
+from sklearn.preprocessing import LabelEncoder
+from config import (
+    products_collection, 
+    reviews_collection, 
+    sentiment_results_collection,
+    topic_results_collection,  # Nouvelle collection ajoutée
+    IMAGE_FOLDER, 
+    CSV_FOLDER
+)
 
 api_routes = Blueprint('api_routes', __name__)
 
-# Nom du modèle fine-tuné sur Hugging Face
-model_name = "Nourhen2001/fine-tuned-bert-sentiment-v1"
-
-# Charger le modèle fine-tuné
-model = AutoModelForSequenceClassification.from_pretrained(model_name)
-
-# Charger le tokenizer
-tokenizer = AutoTokenizer.from_pretrained(model_name)
+# Modèle d'analyse de sentiment
+sentiment_model_name = "Nourhen2001/fine-tuned-bert-sentiment-v1"
+sentiment_model = AutoModelForSequenceClassification.from_pretrained(sentiment_model_name)
+sentiment_tokenizer = AutoTokenizer.from_pretrained(sentiment_model_name)
 
 print("Le modèle et le tokenizer ont été chargés avec succès.")
+# Modèle de classification thématique
+topic_model_name = "Nourhen2001/camembert-base-Topic-v1"
+topic_model = AutoModelForSequenceClassification.from_pretrained(topic_model_name)
+topic_tokenizer = CamembertTokenizer.from_pretrained(topic_model_name)
+
+# Création du pipeline de classification thématique
+topic_classifier = pipeline(
+    "text-classification",
+    model=topic_model,
+    tokenizer=topic_tokenizer,
+    device=0 if torch.cuda.is_available() else -1
+)
+
+# Labels thématiques - à adapter selon les classes de votre modèle
+topic_classes = ['price', 'service', 'quality', 'delivery']
+topic_le = LabelEncoder()
+topic_le.fit(topic_classes)
+
+print("Tous les modèles et tokenizers ont été chargés avec succès")
 
 # ➤ Ajouter un Produit
 @api_routes.route("/add_product", methods=["POST"])
@@ -129,6 +167,40 @@ def get_all_reviews():
         review["_id"] = str(review["_id"])
     return jsonify(reviews)
 
+@api_routes.route("/simple_reviews_count", methods=["GET"])
+def get_simple_reviews_count():
+    try:
+        pipeline = [
+            {
+                "$group": {
+                    "_id": "$product_id",
+                    "total_reviews": {"$sum": 1}
+                }
+            }
+        ]
+        results = list(reviews_collection.aggregate(pipeline))
+        return jsonify(results)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@api_routes.route("/product/<product_id>/reviews_count", methods=["GET"])
+def get_product_reviews_count(product_id):
+    try:
+        count = reviews_collection.count_documents({"product_id": product_id})
+        product = products_collection.find_one(
+            {"_id": ObjectId(product_id)},
+            {"name": 1}
+        )
+        
+        return jsonify({
+            "product_id": product_id,
+            "product_name": product.get("name") if product else "Unknown Product",
+            "total_reviews": count
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @api_routes.route("/sentiment_analysis", methods=["POST"])
 def sentiment_analysis():
     product_id = request.form.get("product_id")
@@ -172,10 +244,10 @@ def sentiment_analysis():
             # Vérifier si l'avis a déjà été analysé pour ce produit et cette date
             if not any(analysis["review_text"] == review_text for analysis in existing_document["analyses"]):
                 # Tokeniser le texte de l'avis
-                inputs = tokenizer(review_text, return_tensors="pt", padding=True, truncation=True)
+                inputs = sentiment_tokenizer(review_text, return_tensors="pt", padding=True, truncation=True)
 
                 # Effectuer la prédiction avec le modèle
-                outputs = model(**inputs)
+                outputs = sentiment_model(**inputs)
 
                 # Extraire les logits et appliquer la fonction softmax
                 logits = outputs.logits
@@ -229,10 +301,10 @@ def sentiment_analysis():
             review_text = review["review_text"]
 
             # Tokeniser le texte de l'avis
-            inputs = tokenizer(review_text, return_tensors="pt", padding=True, truncation=True)
+            inputs = sentiment_tokenizer(review_text, return_tensors="pt", padding=True, truncation=True)
 
             # Effectuer la prédiction avec le modèle
-            outputs = model(**inputs)
+            outputs = sentiment_model(**inputs)
 
             # Extraire les logits et appliquer la fonction softmax
             logits = outputs.logits
@@ -375,3 +447,164 @@ def get_sentiment_trends(product_id):
         trends["negative"].append(percentages["negative"])
     
     return jsonify(trends)
+
+
+
+
+# ➤ Endpoint de Classification Thématique
+@api_routes.route("/topic_classification", methods=["POST"])
+def topic_classification():
+    product_id = request.form.get("product_id")
+    
+    if not product_id:
+        return jsonify({"error": "L'ID du produit est requis"}), 400
+
+    # Récupérer tous les avis pour le produit spécifié
+    reviews = list(reviews_collection.find({"product_id": product_id}))  # Correction: ajout de la parenthèse manquante
+
+    if not reviews:
+        return jsonify({"error": "Aucun avis trouvé pour ce produit"}), 404
+
+    try:
+        # Trouver la date et heure les plus récentes
+        latest_datetime = max([datetime.strptime(review["date_added"], "%d-%m-%Y %H:%M:%S") for review in reviews])
+        latest_datetime_str = latest_datetime.strftime("%d-%m-%Y %H:%M:%S")
+
+        # Filtrer les avis pour ne garder que les plus récents
+        latest_reviews = [review for review in reviews if review["date_added"] == latest_datetime_str]
+
+        if not latest_reviews:
+            return jsonify({"error": "Aucun avis trouvé pour la date et heure les plus récentes"}), 404
+
+        # Liste pour stocker les résultats de classification
+        topic_results = []
+
+        # Vérifier si un document existe déjà pour ce produit et cette date
+        existing_document = topic_results_collection.find_one({
+            "product_id": ObjectId(product_id),
+            "date_added": latest_datetime_str
+        })
+
+        # Date d'analyse actuelle
+        analysis_date = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+
+        if existing_document:
+            # Si le document existe, ajouter les nouvelles analyses
+            for review in latest_reviews:
+                review_text = review["review_text"]
+
+                # Vérifier si cet avis n'a pas encore été analysé
+                if not any(analysis.get("review_text") == review_text for analysis in existing_document.get("analyses", [])):
+                    # Effectuer la classification thématique
+                    try:
+                        result = topic_classifier(review_text)
+                        label_idx = int(result[0]['label'].split('_')[-1])
+                        topic = topic_le.inverse_transform([label_idx])[0]
+                        confidence = result[0]['score']
+
+                        # Mettre à jour le document
+                        topic_results_collection.update_one(
+                            {"_id": existing_document["_id"]},
+                            {
+                                "$push": {
+                                    "analyses": {
+                                        "review_text": review_text,
+                                        "topic": topic,
+                                        "confidence": float(confidence),  # Convertir en float pour MongoDB
+                                        "analysis_date": analysis_date,
+                                        "date_added": review["date_added"]
+                                    }
+                                }
+                            }
+                        )
+
+                        # Ajouter aux résultats
+                        topic_results.append({
+                            "review_text": review_text,
+                            "topic": topic,
+                            "confidence": float(confidence),
+                            "analysis_date": analysis_date,
+                            "date_added": review["date_added"]
+                        })
+                    except Exception as e:
+                        print(f"Erreur lors de la classification: {str(e)}")
+                        continue
+
+        else:
+            # Si le document n'existe pas, en créer un nouveau
+            analyses = []
+
+            for review in latest_reviews:
+                review_text = review["review_text"]
+                
+                try:
+                    # Effectuer la classification thématique
+                    result = topic_classifier(review_text)
+                    label_idx = int(result[0]['label'].split('_')[-1])
+                    topic = topic_le.inverse_transform([label_idx])[0]
+                    confidence = result[0]['score']
+
+                    analyses.append({
+                        "review_text": review_text,
+                        "topic": topic,
+                        "confidence": float(confidence),
+                        "analysis_date": analysis_date,
+                        "date_added": review["date_added"]
+                    })
+                except Exception as e:
+                    print(f"Erreur lors de la classification: {str(e)}")
+                    continue
+
+            # Créer un nouveau document seulement si on a des analyses valides
+            if analyses:
+                topic_data = {
+                    "product_id": ObjectId(product_id),
+                    "analysis_date": analysis_date,
+                    "analyses": analyses
+                }
+
+                topic_results_collection.insert_one(topic_data)
+                topic_results = analyses
+
+        return jsonify({
+            "message": "Classification thématique terminée",
+            "topic_results": topic_results,
+            "count": len(topic_results)
+        })
+
+    except Exception as e:
+        return jsonify({"error": f"Erreur du serveur: {str(e)}"}), 500
+
+# ➤ Distribution des Thématiques
+@api_routes.route("/topic_distribution/<product_id>", methods=["GET"])
+def get_topic_distribution(product_id):
+    try:
+        # Pipeline d'agrégation pour calculer la distribution
+        pipeline = [
+            {"$match": {"product_id": ObjectId(product_id)}},
+            {"$unwind": "$analyses"},
+            {"$group": {
+                "_id": "$analyses.topic",
+                "count": {"$sum": 1}
+            }},
+            {"$project": {
+                "topic": "$_id",
+                "count": 1,
+                "_id": 0
+            }}
+        ]
+        
+        results = list(topic_results_collection.aggregate(pipeline))
+        
+        if not results:
+            return jsonify({"error": "Aucune donnée d'analyse trouvée"}), 404
+        
+        # Calculer les pourcentages
+        total = sum(item['count'] for item in results)
+        for item in results:
+            item['percentage'] = round((item['count'] / total) * 100, 1) if total > 0 else 0
+        
+        return jsonify(results)
+    
+    except Exception as e:
+        return jsonify({"error": f"Erreur du serveur: {str(e)}"}), 500

@@ -12,6 +12,7 @@ db = client[DB_NAME]
 products_collection = db["products"]
 reviews_collection = db["reviews"]
 sentiment_results_collection = db["sentiment_results"]
+topic_results_collection = db["topic_results"]
 summary_results_collection = db["summary_results"]
 
 # Configuration des dossiers
