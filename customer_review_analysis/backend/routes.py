@@ -608,3 +608,40 @@ def get_topic_distribution(product_id):
     
     except Exception as e:
         return jsonify({"error": f"Erreur du serveur: {str(e)}"}), 500
+
+@api_routes.route("/combined_sentiment_topic/<product_id>", methods=["GET"])
+def combined_sentiment_topic(product_id):
+    try:
+        # Charger toutes les analyses sentimentales
+        sentiment_doc = sentiment_results_collection.find_one({"product_id": ObjectId(product_id)})
+        topic_doc = topic_results_collection.find_one({"product_id": ObjectId(product_id)})
+
+        if not sentiment_doc or not topic_doc:
+            return jsonify({"error": "Données non trouvées pour ce produit"}), 404
+
+        sentiment_analyses = sentiment_doc.get("analyses", [])
+        topic_analyses = topic_doc.get("analyses", [])
+
+        # Indexer les topics par texte d'avis
+        topic_map = {ta["review_text"]: ta["topic"] for ta in topic_analyses}
+
+        # Initialiser la structure
+        correlation_counts = {
+            "price": {"positive": 0, "neutral": 0, "negative": 0},
+            "service": {"positive": 0, "neutral": 0, "negative": 0},
+            "quality": {"positive": 0, "neutral": 0, "negative": 0},
+            "delivery": {"positive": 0, "neutral": 0, "negative": 0}
+        }
+
+        for sa in sentiment_analyses:
+            review_text = sa["review_text"]
+            sentiment = sa["sentiment"]
+            topic = topic_map.get(review_text)
+
+            if topic in correlation_counts:
+                correlation_counts[topic][sentiment] += 1
+
+        return jsonify(correlation_counts)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
