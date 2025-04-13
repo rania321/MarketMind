@@ -581,53 +581,64 @@ def topic_classification():
 @api_routes.route("/topic_distribution/<product_id>", methods=["GET"])
 def get_topic_distribution(product_id):
     try:
-        # Pipeline d'agrégation pour calculer la distribution
-        pipeline = [
-            {"$match": {"product_id": ObjectId(product_id)}},
-            {"$unwind": "$analyses"},
-            {"$group": {
-                "_id": "$analyses.topic",
-                "count": {"$sum": 1}
-            }},
-            {"$project": {
-                "topic": "$_id",
-                "count": 1,
-                "_id": 0
-            }}
-        ]
+        # Trouver la dernière analyse thématique pour ce produit
+        latest_topic_analysis = topic_results_collection.find_one(
+            {"product_id": ObjectId(product_id)},
+            sort=[("analysis_date", -1)]
+        )
         
-        results = list(topic_results_collection.aggregate(pipeline))
+        if not latest_topic_analysis:
+            return jsonify({"error": "No topic analysis found for this product"}), 404
+            
+        # Compter les topics dans la dernière analyse
+        topic_counts = {"price": 0, "service": 0, "quality": 0, "delivery": 0}
         
-        if not results:
-            return jsonify({"error": "Aucune donnée d'analyse trouvée"}), 404
-        
-        # Calculer les pourcentages
-        total = sum(item['count'] for item in results)
-        for item in results:
-            item['percentage'] = round((item['count'] / total) * 100, 1) if total > 0 else 0
-        
+        for analysis in latest_topic_analysis.get("analyses", []):
+            if analysis["topic"] in topic_counts:
+                topic_counts[analysis["topic"]] += 1
+                
+        total = sum(topic_counts.values())
+        if total == 0:
+            return jsonify({"error": "No topic data available"}), 404
+            
+        # Convertir en pourcentages
+        results = []
+        for topic, count in topic_counts.items():
+            results.append({
+                "topic": topic,
+                "count": count,
+                "percentage": round((count / total) * 100, 1)
+            })
+            
         return jsonify(results)
     
     except Exception as e:
-        return jsonify({"error": f"Erreur du serveur: {str(e)}"}), 500
-
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+    
 @api_routes.route("/combined_sentiment_topic/<product_id>", methods=["GET"])
 def combined_sentiment_topic(product_id):
     try:
-        # Charger toutes les analyses sentimentales
-        sentiment_doc = sentiment_results_collection.find_one({"product_id": ObjectId(product_id)})
-        topic_doc = topic_results_collection.find_one({"product_id": ObjectId(product_id)})
+        # Trouver la dernière analyse de sentiment
+        latest_sentiment = sentiment_results_collection.find_one(
+            {"product_id": ObjectId(product_id)},
+            sort=[("analysis_date", -1)]
+        )
+        
+        # Trouver la dernière analyse thématique
+        latest_topic = topic_results_collection.find_one(
+            {"product_id": ObjectId(product_id)},
+            sort=[("analysis_date", -1)]
+        )
 
-        if not sentiment_doc or not topic_doc:
+        if not latest_sentiment or not latest_topic:
             return jsonify({"error": "Données non trouvées pour ce produit"}), 404
 
-        sentiment_analyses = sentiment_doc.get("analyses", [])
-        topic_analyses = topic_doc.get("analyses", [])
+        # Créer un mapping des sentiments par texte d'avis
+        sentiment_map = {}
+        for analysis in latest_sentiment.get("analyses", []):
+            sentiment_map[analysis["review_text"]] = analysis["sentiment"]
 
-        # Indexer les topics par texte d'avis
-        topic_map = {ta["review_text"]: ta["topic"] for ta in topic_analyses}
-
-        # Initialiser la structure
+        # Initialiser la structure de résultats
         correlation_counts = {
             "price": {"positive": 0, "neutral": 0, "negative": 0},
             "service": {"positive": 0, "neutral": 0, "negative": 0},
@@ -635,16 +646,16 @@ def combined_sentiment_topic(product_id):
             "delivery": {"positive": 0, "neutral": 0, "negative": 0}
         }
 
-        for sa in sentiment_analyses:
-            review_text = sa["review_text"]
-            sentiment = sa["sentiment"]
-            topic = topic_map.get(review_text)
-
-            if topic in correlation_counts:
+        # Compter les corrélations
+        for topic_analysis in latest_topic.get("analyses", []):
+            review_text = topic_analysis["review_text"]
+            topic = topic_analysis["topic"]
+            sentiment = sentiment_map.get(review_text)
+            
+            if topic in correlation_counts and sentiment in correlation_counts[topic]:
                 correlation_counts[topic][sentiment] += 1
 
         return jsonify(correlation_counts)
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-

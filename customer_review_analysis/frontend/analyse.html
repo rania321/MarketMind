@@ -1,13 +1,614 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarktMind - Dashboard d'Analyse</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>MarktMind - Analytics Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --black: #000000;
+            --blue: #04a4ed;
+            --red: #fe3f40;
+            --white: #ffffff;
+            --gray-light: #f5f5f5;
+            --gray-medium: #e0e0e0;
+            --gray-dark: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: var(--black);
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header Styles */
+        .header {
+            background-color: var(--black);
+            color: var(--white);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .logo-text span {
+            color: var(--blue);
+        }
+
+        .nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav a {
+            color: var(--white);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            transition: color 0.3s;
+        }
+
+        .nav a:hover {
+            color: var(--blue);
+        }
+
+        /* Main Content */
+        .main {
+            padding: 2rem 0;
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .dashboard-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: #333;
+        }
+
+        .form-inline {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .form-inline .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-inline select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: var(--blue);
+            color: var(--white);
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #0388c4;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* KPI Cards */
+        .kpi-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .kpi-card.total-reviews {
+            border-top: 4px solid var(--blue);
+        }
+
+        .kpi-card.sentiment-score {
+            border-top: 4px solid #4CAF50;
+        }
+
+        .kpi-card.response-rate {
+            border-top: 4px solid #FF9800;
+        }
+
+        .kpi-card.popular-topic {
+            border-top: 4px solid #9C27B0;
+        }
+
+        .kpi-icon {
+            font-size: 1.8rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .kpi-content h3 {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .kpi-trend {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .trend-up {
+            color: #4CAF50;
+        }
+
+        .trend-down {
+            color: #F44336;
+        }
+
+        .kpi-progress {
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 3px;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 3px;
+            background: var(--blue);
+            width: 0%;
+            transition: width 1s ease;
+        }
+
+        .kpi-subtext {
+            font-size: 0.9rem;
+            color: #888;
+        }
+
+        /* Dashboard Sections */
+        .dashboard-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .dashboard-section h3 {
+            color: #444;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        /* Chart Layout */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            height: 300px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* New layout for the specific sections */
+        .topics-correlation-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .wordcloud-full-width {
+            grid-column: 1 / -1;
+            margin-bottom: 20px;
+        }
+
+        /* Sentiment Section */
+        .sentiment-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .sentiment-section h3 {
+            color: #444;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .sentiment-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .sentiment-stats-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sentiment-chart-col {
+            flex: 1;
+        
+        }
+
+        .sentiment-stat-card {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .sentiment-stat-icon {
+            font-size: 1.5rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sentiment-stat-icon.positive {
+            background-color: rgba(4, 164, 237, 0.1);
+            color: var(--blue);
+        }
+
+        .sentiment-stat-icon.neutral {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: #666;
+        }
+
+        .sentiment-stat-icon.negative {
+            background-color: rgba(254, 63, 64, 0.1);
+            color: var(--red);
+        }
+
+        .sentiment-stat-content {
+            flex: 1;
+        }
+
+        .sentiment-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .sentiment-stat-label {
+            font-size: 1.0rem;
+            color: #666;
+        }
+
+        .sentiment-stat-percent {
+            font-size: 1.4rem;
+            font-weight: 500;
+        }
+
+        .sentiment-trend-chart {
+            margin-top: 20px;
+        }
+
+        /* Word Cloud */
+        .wordcloud-container {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        #wordcloud {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            margin: 20px auto;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .word {
+            position: absolute;
+            display: inline-block;
+            transition: all 0.3s;
+            cursor: default;
+            font-weight: 500;
+            line-height: 1;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            padding: 3px 5px;
+            border-radius: 3px;
+        }
+
+        .word:hover {
+            transform: scale(1.2);
+            z-index: 10;
+        }
+
+        .word.positive {
+            color: var(--blue);
+            
+        }
+
+        .word.neutral {
+            color: #666;
+            
+        }
+
+        .word.negative {
+            color: var(--red);
+            
+        }
+        .wordcloud-filter {
+    margin-bottom: 15px;
+}
+
+.filter-options {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-filter {
+    padding: 6px 12px;
+    border: 1px solid #ddd;
+    background: #f5f5f5;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.btn-filter.active {
+    background-color: var(--blue);
+    color: white;
+    border-color: var(--blue);
+}
+
+.btn-filter[data-filter="positive"]:hover {
+    background-color: rgba(4, 164, 237, 0.1);
+    border-color: var(--blue);
+}
+
+.btn-filter[data-filter="neutral"]:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: #666;
+}
+
+.btn-filter[data-filter="negative"]:hover {
+    background-color: rgba(254, 63, 64, 0.1);
+    border-color: var(--red);
+}
+
+        .sentiment-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .legend-color {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .legend-color.positive {
+            background-color: var(--blue);
+        }
+
+        .legend-color.neutral {
+            background-color: #666;
+        }
+
+        .legend-color.negative {
+            background-color: var(--red);
+        }
+
+        /* Reviews Section */
+        .sentiment-details {
+            margin-top: 2rem;
+        }
+
+        .sentiment-item {
+            background-color: var(--white);
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            animation: fadeIn 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .sentiment-item.positive {
+            border-left: 4px solid var(--blue);
+        }
+
+        .sentiment-item.neutral {
+            border-left: 4px solid #666;
+        }
+
+        .sentiment-item.negative {
+            border-left: 4px solid var(--red);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--black);
+            color: var(--white);
+            padding: 2rem 0;
+            text-align: center;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-brand .logo {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links h4, 
+        .footer-contact h4 {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-links ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid #eee;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .form-inline {
+                width: 100%;
+            }
+            
+            .chart-grid,
+            .topics-correlation-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .kpi-section {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .sentiment-row {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .kpi-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
     <header class="header">
@@ -30,32 +631,32 @@
         <section id="analysis" class="section">
             <div class="container">
                 <div class="dashboard-header">
-                    <h2>Dashboard d'Analyse</h2>
+                    <h2>Analytics Dashboard</h2>
                     <div class="dashboard-controls">
                         <form id="sentimentAnalysisForm" class="form-inline">
                             <div class="form-group">
                                 <select id="analysisProductSelect" required>
-                                    <option value="">Sélectionnez un produit</option>
+                                    <option value="">Select a product</option>
                                 </select>
                             </div>
-                            <button type="submit" class="btn"><i class="fas fa-chart-pie"></i> Analyser</button>
+                            <button type="submit" class="btn">Analyze</button>
                         </form>
                     </div>
                 </div>
 
                 <div id="analysisResults" class="analysis-results">
-                    <!-- Section KPI -->
+                    <!-- KPI Section -->
                     <div class="kpi-section">
                         <div class="kpi-card total-reviews">
                             <div class="kpi-icon">
                                 <i class="fas fa-comment-alt"></i>
                             </div>
                             <div class="kpi-content">
-                                <h3>Total Avis</h3>
+                                <h3>Total Reviews</h3>
                                 <div class="kpi-value" id="totalReviews">0</div>
                                 <div class="kpi-trend">
                                     <i class="fas fa-arrow-up trend-up"></i>
-                                    <span>0% vs dernier mois</span>
+                                    <span>0% vs last month</span>
                                 </div>
                             </div>
                         </div>
@@ -65,7 +666,7 @@
                                 <i class="fas fa-smile"></i>
                             </div>
                             <div class="kpi-content">
-                                <h3>Score de Sentiment</h3>
+                                <h3>Sentiment Score</h3>
                                 <div class="kpi-value" id="sentimentScore">0%</div>
                                 <div class="kpi-progress">
                                     <div class="progress-bar" id="sentimentProgress"></div>
@@ -78,11 +679,11 @@
                                 <i class="fas fa-reply"></i>
                             </div>
                             <div class="kpi-content">
-                                <h3>Taux de Réponse</h3>
+                                <h3>Response Rate</h3>
                                 <div class="kpi-value" id="responseRate">0%</div>
                                 <div class="kpi-trend">
                                     <i class="fas fa-arrow-up trend-up"></i>
-                                    <span>0% vs dernier mois</span>
+                                    <span>0% vs last month</span>
                                 </div>
                             </div>
                         </div>
@@ -92,97 +693,127 @@
                                 <i class="fas fa-tag"></i>
                             </div>
                             <div class="kpi-content">
-                                <h3>Thématique Principale</h3>
+                                <h3>Main Topic</h3>
                                 <div class="kpi-value" id="mainTopic">-</div>
-                                <div class="kpi-subtext" id="topicPercentage">0% des avis</div>
+                                <div class="kpi-subtext" id="topicPercentage">0% of reviews</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Section Analyse de Sentiment -->
-                    <div class="dashboard-section">
-                        <h3>Répartition des Sentiments</h3>
-                        <div class="analytics-row">
-                            <div class="sentiment-stats">
-                                <div class="stat positive">
-                                    <span class="count">0</span>
-                                    <span>Positif</span>
-                                    <div class="percentage" id="positivePercent">0%</div>
+                    <!-- Sentiment Distribution Section -->
+                    <div class="sentiment-section">
+                        <h3>Sentiment Distribution</h3>
+                        
+                        <!-- First row: Stats + Pie Chart -->
+                        <div class="sentiment-row">
+                            <div class="sentiment-stats-col">
+                                <div class="sentiment-stat-card">
+                                    <div class="sentiment-stat-icon positive">
+                                        <i class="fas fa-smile"></i>
+                                    </div>
+                                    <div class="sentiment-stat-content">
+                                        
+                                        <div class="sentiment-stat-label">Positive</div>
+                                        <div class="sentiment-stat-percent" id="positivePercent">0%</div>
+                                    </div>
                                 </div>
-                                <div class="stat neutral">
-                                    <span class="count">0</span>
-                                    <span>Neutre</span>
-                                    <div class="percentage" id="neutralPercent">0%</div>
+                                
+                                <div class="sentiment-stat-card">
+                                    <div class="sentiment-stat-icon neutral">
+                                        <i class="fas fa-meh"></i>
+                                    </div>
+                                    <div class="sentiment-stat-content">
+                                       
+                                        <div class="sentiment-stat-label">Neutral</div>
+                                        <div class="sentiment-stat-percent" id="neutralPercent">0%</div>
+                                    </div>
                                 </div>
-                                <div class="stat negative">
-                                    <span class="count">0</span>
-                                    <span>Négatif</span>
-                                    <div class="percentage" id="negativePercent">0%</div>
+                                
+                                <div class="sentiment-stat-card">
+                                    <div class="sentiment-stat-icon negative">
+                                        <i class="fas fa-frown"></i>
+                                    </div>
+                                    <div class="sentiment-stat-content">
+                                        
+                                        <div class="sentiment-stat-label">Negative</div>
+                                        <div class="sentiment-stat-percent" id="negativePercent">0%</div>
+                                    </div>
                                 </div>
                             </div>
                             
+                            <div class="sentiment-chart-col">
+                                <div class="chart-container">
+                                    <canvas id="sentimentChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Second row: Trend Chart -->
+                        <div class="sentiment-trend-chart">
                             <div class="chart-container">
-                                <canvas id="sentimentChart"></canvas>
+                                <canvas id="trendsChart"></canvas>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Section Détails des Avis -->
-                    <div class="dashboard-section">
-                        <div class="section-header">
-                            <h3></i> Détails des Avis</h3>
-                            <button id="showAllReviews" class="btn btn-small" style="display: none;">
-                                <i class="fas fa-eye"></i> Voir tout
-                            </button>
-                        </div>
-                        <div id="sentimentDetails" class="sentiment-details"></div>
-                    </div>
-
-                    <!-- Section Mots-clés -->
-                    <div class="dashboard-section">
-                        <h3>Mots-clés fréquents</h3>
-                        <div class="wordcloud-container">
-                            <div class="sentiment-legend">
-                                <div class="legend-item">
-                                    <span class="legend-color positive"></span>
-                                    <span>Positif</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-color neutral"></span>
-                                    <span>Neutre</span>
-                                </div>
-                                <div class="legend-item">
-                                    <span class="legend-color negative"></span>
-                                    <span>Négatif</span>
-                                </div>
-                            </div>
-                            <div id="wordcloud"></div>
-                        </div>
-                    </div>
-
-                    <!-- Section Tendance Temporelle -->
-                    <div class="dashboard-section">
-                        <h3>Évolution des Sentiments</h3>
-                        <div class="chart-container">
-                            <canvas id="trendsChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Section Thématiques -->
-                    <div class="grid-section">
+                    <!-- Frequent Keywords Section (full width) -->
+                    <div class="wordcloud-full-width">
                         <div class="dashboard-section">
-                            <h3>Distribution des Thématiques</h3>
+                            <h3>Frequent Keywords</h3>
+                            <div class="wordcloud-filter">
+                                <div class="filter-options">
+                                    <button class="btn-filter active" data-filter="all">All</button>
+                                    <button class="btn-filter" data-filter="positive">Positive</button>
+                                    <button class="btn-filter" data-filter="neutral">Neutral</button>
+                                    <button class="btn-filter" data-filter="negative">Negative</button>
+                                </div>
+                            </div>
+                            <div class="wordcloud-container">
+                                <div class="sentiment-legend">
+                                    <div class="legend-item">
+                                        <span class="legend-color positive"></span>
+                                        <span>Positive</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color neutral"></span>
+                                        <span>Neutral</span>
+                                    </div>
+                                    <div class="legend-item">
+                                        <span class="legend-color negative"></span>
+                                        <span>Negative</span>
+                                    </div>
+                                </div>
+                                <div id="wordcloud"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Topics Distribution and Topics/Sentiment Correlation Section (same row) -->
+                    <div class="topics-correlation-grid">
+                        <div class="dashboard-section">
+                            <h3>Topics Distribution</h3>
                             <div class="chart-container">
                                 <canvas id="topicsChart"></canvas>
                             </div>
                         </div>
-                        
+
                         <div class="dashboard-section">
-                            <h3>Corrélation Thèmes/Sentiments</h3>
-                            <div class="chart-container">
+                            <h3>Topics/Sentiment Correlation</h3>
+                            <div class="chart-container" style="height: 300px;">
                                 <canvas id="combinedChart"></canvas>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Reviews Details Section -->
+                    <div class="dashboard-section">
+                        <div class="section-header">
+                            <h3>Reviews Details</h3>
+                            <button id="showAllReviews" class="btn btn-small" style="display: none;">
+                                <i class="fas fa-eye"></i> Show all
+                            </button>
+                        </div>
+                        <div id="sentimentDetails" class="sentiment-details"></div>
                     </div>
                 </div>
             </div>

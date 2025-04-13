@@ -5,7 +5,7 @@ const sentimentColors = {
     neutral: '#666666',
     negative: '#fe3f40'
 };
-
+let currentWordFilter = 'all';
 // Variables pour la pagination (uniquement nécessaires pour avis.html)
 let currentReviewPage = 1;
 const reviewsPerPage = 5;
@@ -145,9 +145,9 @@ async function loadTopicDistribution(productId) {
         if (!topicsChart) return;
         
         const labels = topicData.map(item => 
-            item.topic === 'price' ? 'Prix' :
+            item.topic === 'price' ? 'Price' :
             item.topic === 'service' ? 'Service' :
-            item.topic === 'quality' ? 'Qualité' : 'Livraison'
+            item.topic === 'quality' ? 'Quality' : 'Delivery'
         );
         const data = topicData.map(item => item.percentage);
         
@@ -168,7 +168,7 @@ function initCombinedChart() {
     combinedChart = new Chart(ctx.getContext('2d'), {
         type: 'bar',
         data: {
-            labels: ['Prix', 'Service', 'Qualité', 'Livraison'],
+            labels: ['Price', 'Service', 'Quality', 'Delivery'],
             datasets: [
                 {
                     label: 'Positif',
@@ -226,7 +226,7 @@ function initCombinedChart() {
 
 async function loadCombinedSentimentTopic(productId) {
     try {
-        const response = await fetch(`/api/combined_sentiment_topic/${productId}`);
+        const response = await fetch(`/api/combined_sentiment_topic/${productId}?nocache=${Date.now()}`);
         const combinedData = await response.json();
         
         if (!combinedChart) return;
@@ -586,9 +586,9 @@ async function updateKPIs(productId, sentimentResults) {
             );
             
             document.getElementById('mainTopic').textContent = 
-                mainTopic.topic === 'price' ? 'Prix' :
+                mainTopic.topic === 'price' ? 'Price' :
                 mainTopic.topic === 'service' ? 'Service' :
-                mainTopic.topic === 'quality' ? 'Qualité' : 'Livraison';
+                mainTopic.topic === 'quality' ? 'Quality' : 'Delivery';
                 
             document.getElementById('topicPercentage').textContent = 
                 `${mainTopic.percentage}% des avis`;
@@ -830,76 +830,31 @@ async function loadWordCloud(productId) {
             const wordEntries = Object.entries(words).sort((a, b) => b[1] - a[1]).slice(0, 30);
             
             wordEntries.forEach(([word, count]) => {
-                allWords.push({
-                    text: word,
-                    size: 10 + (count * 0.8),
-                    sentiment: sentiment
-                });
-            });
+    allWords.push({
+        text: word,
+        size: 8 + (count * 0.5),  // Réduit de 10+0.8 à 8+0.5
+        sentiment: sentiment,
+        visible: true
+    });
+});
         });
         
-        allWords.sort((a, b) => b.size - a.size);
-        const placedWords = [];
+        renderWordCloud(allWords, wordcloud, width, height);
         
-        allWords.forEach((wordObj) => {
-            const wordElement = document.createElement('div');
-            wordElement.className = `word ${wordObj.sentiment}`;
-            wordElement.textContent = wordObj.text;
-            wordElement.style.fontSize = `${wordObj.size}px`;
-            
-            wordElement.style.visibility = 'hidden';
-            wordcloud.appendChild(wordElement);
-            const wordWidth = wordElement.offsetWidth;
-            const wordHeight = wordElement.offsetHeight;
-            wordElement.remove();
-            
-            let attempts = 0;
-            let placed = false;
-            
-            while (!placed && attempts < 100) {
-                attempts++;
+        // Ajout des gestionnaires d'événements pour les filtres
+        document.querySelectorAll('.btn-filter').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentWordFilter = this.dataset.filter;
                 
-                const left = Math.random() * (width - wordWidth);
-                const top = Math.random() * (height - wordHeight);
+                allWords.forEach(word => {
+                    word.visible = currentWordFilter === 'all' || word.sentiment === currentWordFilter;
+                });
                 
-                let collision = false;
-                for (const placedWord of placedWords) {
-                    if (
-                        left < placedWord.left + placedWord.width &&
-                        left + wordWidth > placedWord.left &&
-                        top < placedWord.top + placedWord.height &&
-                        top + wordHeight > placedWord.top
-                    ) {
-                        collision = true;
-                        break;
-                    }
-                }
-                
-                if (!collision) {
-                    wordElement.style.left = `${left}px`;
-                    wordElement.style.top = `${top}px`;
-                    wordElement.style.visibility = 'visible';
-                    wordcloud.appendChild(wordElement);
-                    
-                    placedWords.push({
-                        left: left,
-                        top: top,
-                        width: wordWidth,
-                        height: wordHeight
-                    });
-                    
-                    placed = true;
-                }
-            }
-            
-            if (!placed) {
-                wordElement.style.left = `${Math.random() * (width - wordWidth)}px`;
-                wordElement.style.top = `${Math.random() * (height - wordHeight)}px`;
-                wordElement.style.visibility = 'visible';
-                wordcloud.appendChild(wordElement);
-            }
-            
-            wordElement.title = `${wordObj.text} (${wordObj.sentiment})`;
+                wordcloud.innerHTML = '';
+                renderWordCloud(allWords, wordcloud, width, height);
+            });
         });
         
     } catch (error) {
@@ -908,6 +863,70 @@ async function loadWordCloud(productId) {
     }
 }
 
+function renderWordCloud(words, container, width, height) {
+    const placedWords = [];
+    
+    words.filter(word => word.visible).forEach((wordObj) => {
+        const wordElement = document.createElement('div');
+        wordElement.className = `word ${wordObj.sentiment}`;
+        wordElement.textContent = wordObj.text;
+        wordElement.style.fontSize = `${wordObj.size}px`;
+        
+        wordElement.style.visibility = 'hidden';
+        container.appendChild(wordElement);
+        const wordWidth = wordElement.offsetWidth;
+        const wordHeight = wordElement.offsetHeight;
+        wordElement.remove();
+        
+        let attempts = 0;
+        let placed = false;
+        
+        while (!placed && attempts < 100) {
+            attempts++;
+            
+            const left = Math.random() * (width - wordWidth);
+            const top = Math.random() * (height - wordHeight);
+            
+            let collision = false;
+            for (const placedWord of placedWords) {
+                if (
+                    left < placedWord.left + placedWord.width &&
+                    left + wordWidth > placedWord.left &&
+                    top < placedWord.top + placedWord.height &&
+                    top + wordHeight > placedWord.top
+                ) {
+                    collision = true;
+                    break;
+                }
+            }
+            
+            if (!collision) {
+                wordElement.style.left = `${left}px`;
+                wordElement.style.top = `${top}px`;
+                wordElement.style.visibility = 'visible';
+                container.appendChild(wordElement);
+                
+                placedWords.push({
+                    left: left,
+                    top: top,
+                    width: wordWidth,
+                    height: wordHeight
+                });
+                
+                placed = true;
+            }
+        }
+        
+        if (!placed) {
+            wordElement.style.left = `${Math.random() * (width - wordWidth)}px`;
+            wordElement.style.top = `${Math.random() * (height - wordHeight)}px`;
+            wordElement.style.visibility = 'visible';
+            container.appendChild(wordElement);
+        }
+        
+        wordElement.title = `${wordObj.text} (${wordObj.sentiment})`;
+    });
+}
 async function loadSentimentTrends(productId) {
     try {
         if (!trendsChart) return;
