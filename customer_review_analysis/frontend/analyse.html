@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MarktMind - Analyse de Sentiment</title>
+    <title>MarktMind - Dashboard d'Analyse</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <header class="header">
         <div class="container">
             <div class="logo-container">
-                <!-- <img src="assets/images/logo.png" alt="MarktMind Logo" class="logo-img"> -->
                 <h1 class="logo-text">Markt<span>Mind</span></h1>
             </div>
             <nav class="nav">
@@ -20,7 +20,7 @@
                     <li><a href="index.html">Home</a></li>
                     <li><a href="produit.html">Products</a></li>
                     <li><a href="avis.html">Reviews</a></li>
-                    <li><a href="analyse.html">Analysis</a></li>
+                    <li><a href="analyse.html" class="active">Dashboard</a></li>
                 </ul>
             </nav>
         </div>
@@ -29,70 +29,159 @@
     <main class="main">
         <section id="analysis" class="section">
             <div class="container">
-                <h2>Analyse de Sentiment</h2>
-                <div class="card">
-                    <h3>Lancer une analyse</h3>
-                    <form id="sentimentAnalysisForm" class="form">
-                        <div class="form-group">
-                            <label for="analysisProductSelect">Produit</label>
-                            <select id="analysisProductSelect" required></select>
-                        </div>
-                        <button type="submit" class="btn">Analyser</button>
-                    </form>
+                <div class="dashboard-header">
+                    <h2>Dashboard d'Analyse</h2>
+                    <div class="dashboard-controls">
+                        <form id="sentimentAnalysisForm" class="form-inline">
+                            <div class="form-group">
+                                <select id="analysisProductSelect" required>
+                                    <option value="">Sélectionnez un produit</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn"><i class="fas fa-chart-pie"></i> Analyser</button>
+                        </form>
+                    </div>
                 </div>
 
                 <div id="analysisResults" class="analysis-results">
-                    <h3>Résultats d'analyse</h3>
-                    
-                    <div class="analytics-row">
-                        <div class="sentiment-stats">
-                            <div class="stat positive">
-                                <span class="count">0</span>
-                                <span>Positif</span>
-                                <div class="percentage" id="positivePercent">0%</div>
+                    <!-- Section KPI -->
+                    <div class="kpi-section">
+                        <div class="kpi-card total-reviews">
+                            <div class="kpi-icon">
+                                <i class="fas fa-comment-alt"></i>
                             </div>
-                            <div class="stat neutral">
-                                <span class="count">0</span>
-                                <span>Neutre</span>
-                                <div class="percentage" id="neutralPercent">0%</div>
-                            </div>
-                            <div class="stat negative">
-                                <span class="count">0</span>
-                                <span>Négatif</span>
-                                <div class="percentage" id="negativePercent">0%</div>
+                            <div class="kpi-content">
+                                <h3>Total Avis</h3>
+                                <div class="kpi-value" id="totalReviews">0</div>
+                                <div class="kpi-trend">
+                                    <i class="fas fa-arrow-up trend-up"></i>
+                                    <span>0% vs dernier mois</span>
+                                </div>
                             </div>
                         </div>
                         
-                        <div class="chart-container">
-                            <canvas id="sentimentChart"></canvas>
+                        <div class="kpi-card sentiment-score">
+                            <div class="kpi-icon">
+                                <i class="fas fa-smile"></i>
+                            </div>
+                            <div class="kpi-content">
+                                <h3>Score de Sentiment</h3>
+                                <div class="kpi-value" id="sentimentScore">0%</div>
+                                <div class="kpi-progress">
+                                    <div class="progress-bar" id="sentimentProgress"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card response-rate">
+                            <div class="kpi-icon">
+                                <i class="fas fa-reply"></i>
+                            </div>
+                            <div class="kpi-content">
+                                <h3>Taux de Réponse</h3>
+                                <div class="kpi-value" id="responseRate">0%</div>
+                                <div class="kpi-trend">
+                                    <i class="fas fa-arrow-up trend-up"></i>
+                                    <span>0% vs dernier mois</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="kpi-card popular-topic">
+                            <div class="kpi-icon">
+                                <i class="fas fa-tag"></i>
+                            </div>
+                            <div class="kpi-content">
+                                <h3>Thématique Principale</h3>
+                                <div class="kpi-value" id="mainTopic">-</div>
+                                <div class="kpi-subtext" id="topicPercentage">0% des avis</div>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="wordcloud-section">
-                        <h3>Mots-clés fréquents</h3>
-                        <div class="sentiment-legend">
-                            <div class="legend-item">
-                                <span class="legend-color positive"></span>
-                                <span>Positif</span>
+
+                    <!-- Section Analyse de Sentiment -->
+                    <div class="dashboard-section">
+                        <h3>Répartition des Sentiments</h3>
+                        <div class="analytics-row">
+                            <div class="sentiment-stats">
+                                <div class="stat positive">
+                                    <span class="count">0</span>
+                                    <span>Positif</span>
+                                    <div class="percentage" id="positivePercent">0%</div>
+                                </div>
+                                <div class="stat neutral">
+                                    <span class="count">0</span>
+                                    <span>Neutre</span>
+                                    <div class="percentage" id="neutralPercent">0%</div>
+                                </div>
+                                <div class="stat negative">
+                                    <span class="count">0</span>
+                                    <span>Négatif</span>
+                                    <div class="percentage" id="negativePercent">0%</div>
+                                </div>
                             </div>
-                            <div class="legend-item">
-                                <span class="legend-color neutral"></span>
-                                <span>Neutre</span>
-                            </div>
-                            <div class="legend-item">
-                                <span class="legend-color negative"></span>
-                                <span>Négatif</span>
+                            
+                            <div class="chart-container">
+                                <canvas id="sentimentChart"></canvas>
                             </div>
                         </div>
-                        <div id="wordcloud"></div>
-                    </div> 
+                    </div>
 
-                    <div id="sentimentDetails" class="sentiment-details"></div>
-                    <button id="showAllReviews" class="btn" style="display: none; margin-top: 1rem;">Voir tout</button>
-                    <div class="trends-section">
-                        <h3>Évolution des sentiments au fil du temps</h3>
+                    <!-- Section Détails des Avis -->
+                    <div class="dashboard-section">
+                        <div class="section-header">
+                            <h3></i> Détails des Avis</h3>
+                            <button id="showAllReviews" class="btn btn-small" style="display: none;">
+                                <i class="fas fa-eye"></i> Voir tout
+                            </button>
+                        </div>
+                        <div id="sentimentDetails" class="sentiment-details"></div>
+                    </div>
+
+                    <!-- Section Mots-clés -->
+                    <div class="dashboard-section">
+                        <h3>Mots-clés fréquents</h3>
+                        <div class="wordcloud-container">
+                            <div class="sentiment-legend">
+                                <div class="legend-item">
+                                    <span class="legend-color positive"></span>
+                                    <span>Positif</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color neutral"></span>
+                                    <span>Neutre</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color negative"></span>
+                                    <span>Négatif</span>
+                                </div>
+                            </div>
+                            <div id="wordcloud"></div>
+                        </div>
+                    </div>
+
+                    <!-- Section Tendance Temporelle -->
+                    <div class="dashboard-section">
+                        <h3>Évolution des Sentiments</h3>
                         <div class="chart-container">
                             <canvas id="trendsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Section Thématiques -->
+                    <div class="grid-section">
+                        <div class="dashboard-section">
+                            <h3>Distribution des Thématiques</h3>
+                            <div class="chart-container">
+                                <canvas id="topicsChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-section">
+                            <h3>Corrélation Thèmes/Sentiments</h3>
+                            <div class="chart-container">
+                                <canvas id="combinedChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -105,7 +194,6 @@
             <div class="footer-content">
                 <div class="footer-brand">
                     <div class="logo-container">
-                        <!-- <img src="assets/images/logo.png" alt="MarktMind Logo" class="logo-img"> -->
                         <h3 class="logo-text">Markt<span>Mind</span></h3>
                     </div>
                     <p>AI-powered sentiment analysis for modern businesses.</p>
@@ -115,7 +203,7 @@
                     <ul>
                         <li><a href="produit.html">Products</a></li>
                         <li><a href="avis.html">Reviews</a></li>
-                        <li><a href="analyse.html">Analysis</a></li>
+                        <li><a href="analyse.html">Dashboard</a></li>
                     </ul>
                 </div>
                 <div class="footer-contact">

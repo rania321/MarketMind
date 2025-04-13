@@ -1,5 +1,5 @@
 // Variables globales conditionnelles
-let sentimentChart, trendsChart;
+let sentimentChart, trendsChart, topicsChart, combinedChart;
 const sentimentColors = {
     positive: '#04a4ed',
     neutral: '#666666',
@@ -69,6 +69,8 @@ function initReviewsPage() {
 function initAnalysisPage() {
     initCharts();
     initTrendsChart();
+    initTopicsChart();
+    initCombinedChart();
     
     const sentimentAnalysisForm = document.getElementById('sentimentAnalysisForm');
     if (sentimentAnalysisForm) {
@@ -81,6 +83,181 @@ function initAnalysisPage() {
     const showAllBtn = document.getElementById('showAllReviews');
     if (showAllBtn) {
         showAllBtn.style.display = 'none';
+    }
+}
+
+// Fonction d'initialisation du graphique des topics
+function initTopicsChart() {
+    const ctx = document.getElementById('topicsChart');
+    if (!ctx) return;
+    
+    topicsChart = new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Distribution des Thématiques',
+                data: [],
+                backgroundColor: [
+                    '#4BC0C0',
+                    '#9966FF',
+                    '#FF9F40',
+                    '#36A2EB'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.label}: ${context.raw}%`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Pourcentage (%)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Fonction de chargement des données des topics
+async function loadTopicDistribution(productId) {
+    try {
+        const response = await fetch(`/api/topic_distribution/${productId}`);
+        const topicData = await response.json();
+        
+        if (!topicsChart) return;
+        
+        const labels = topicData.map(item => 
+            item.topic === 'price' ? 'Prix' :
+            item.topic === 'service' ? 'Service' :
+            item.topic === 'quality' ? 'Qualité' : 'Livraison'
+        );
+        const data = topicData.map(item => item.percentage);
+        
+        topicsChart.data.labels = labels;
+        topicsChart.data.datasets[0].data = data;
+        topicsChart.update();
+        
+    } catch (error) {
+        console.error("Erreur lors du chargement des topics:", error);
+        showAlert('Erreur lors du chargement des thématiques', 'error');
+    }
+}
+
+function initCombinedChart() {
+    const ctx = document.getElementById('combinedChart');
+    if (!ctx) return;
+    
+    combinedChart = new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Prix', 'Service', 'Qualité', 'Livraison'],
+            datasets: [
+                {
+                    label: 'Positif',
+                    data: [],
+                    backgroundColor: sentimentColors.positive,
+                    borderColor: sentimentColors.positive,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Neutre',
+                    data: [],
+                    backgroundColor: sentimentColors.neutral,
+                    borderColor: sentimentColors.neutral,
+                    borderWidth: 1
+                },
+                {
+                    label: 'Négatif',
+                    data: [],
+                    backgroundColor: sentimentColors.negative,
+                    borderColor: sentimentColors.negative,
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Nombre d\'avis'
+                    }
+                },
+                x: {
+                    stacked: true
+                },
+                y: {
+                    stacked: true
+                }
+            }
+        }
+    });
+}
+
+async function loadCombinedSentimentTopic(productId) {
+    try {
+        const response = await fetch(`/api/combined_sentiment_topic/${productId}`);
+        const combinedData = await response.json();
+        
+        if (!combinedChart) return;
+        
+        // Mettre à jour les données du graphique
+        combinedChart.data.datasets[0].data = [
+            combinedData.price.positive,
+            combinedData.service.positive,
+            combinedData.quality.positive,
+            combinedData.delivery.positive
+        ];
+        
+        combinedChart.data.datasets[1].data = [
+            combinedData.price.neutral,
+            combinedData.service.neutral,
+            combinedData.quality.neutral,
+            combinedData.delivery.neutral
+        ];
+        
+        combinedChart.data.datasets[2].data = [
+            combinedData.price.negative,
+            combinedData.service.negative,
+            combinedData.quality.negative,
+            combinedData.delivery.negative
+        ];
+        
+        combinedChart.update();
+        
+    } catch (error) {
+        console.error("Erreur lors du chargement des données combinées:", error);
+        showAlert('Erreur lors du chargement de la corrélation thématique/sentiment', 'error');
     }
 }
 
@@ -340,6 +517,7 @@ function analyzeSentiment() {
     
     showLoading(true);
     
+    // D'abord l'analyse de sentiment
     fetch('/api/sentiment_analysis', {
         method: 'POST',
         headers: {
@@ -353,15 +531,75 @@ function analyzeSentiment() {
             displaySentimentResults(data.sentiment_results);
             loadWordCloud(productId);
             loadSentimentTrends(productId);
+            
+            // Mettre à jour les KPI
+            updateKPIs(productId, data.sentiment_results);
+            
+            // Ensuite l'analyse thématique sur les mêmes avis
+            return fetch('/api/topic_classification', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({ product_id: productId })
+            });
         } else {
-            showAlert(data.error || 'Erreur lors de l\'analyse de sentiment', 'error');
+            throw new Error(data.error || 'Erreur lors de l\'analyse de sentiment');
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.topic_results) {
+            // Charger les visualisations thématiques
+            loadTopicDistribution(productId);
+            loadCombinedSentimentTopic(productId);
         }
     })
     .catch(error => {
         console.error('Erreur:', error);
-        showAlert('Erreur lors de l\'analyse de sentiment', 'error');
+        showAlert(error.message || 'Erreur lors de l\'analyse', 'error');
     })
     .finally(() => showLoading(false));
+}
+
+// Nouvelle fonction pour mettre à jour les KPI
+async function updateKPIs(productId, sentimentResults) {
+    try {
+        // KPI 1: Nombre total d'avis
+        const reviewsCount = sentimentResults.length;
+        document.getElementById('totalReviews').textContent = reviewsCount;
+        
+        // KPI 2: Score de sentiment (pourcentage positif)
+        const positiveCount = sentimentResults.filter(r => r.sentiment === 'positive').length;
+        const sentimentScore = Math.round((positiveCount / reviewsCount) * 100);
+        document.getElementById('sentimentScore').textContent = `${sentimentScore}%`;
+        document.getElementById('sentimentProgress').style.width = `${sentimentScore}%`;
+        
+        // KPI 3: Récupérer la distribution des thèmes
+        const topicResponse = await fetch(`/api/topic_distribution/${productId}`);
+        const topicData = await topicResponse.json();
+        
+        if (topicData.length > 0) {
+            // Trouver le thème principal
+            const mainTopic = topicData.reduce((prev, current) => 
+                (prev.percentage > current.percentage) ? prev : current
+            );
+            
+            document.getElementById('mainTopic').textContent = 
+                mainTopic.topic === 'price' ? 'Prix' :
+                mainTopic.topic === 'service' ? 'Service' :
+                mainTopic.topic === 'quality' ? 'Qualité' : 'Livraison';
+                
+            document.getElementById('topicPercentage').textContent = 
+                `${mainTopic.percentage}% des avis`;
+        }
+        
+        // KPI 4: Taux de réponse (simulé - à adapter selon votre logique métier)
+        document.getElementById('responseRate').textContent = '75%';
+        
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour des KPI:", error);
+    }
 }
 
 function displaySentimentResults(results) {

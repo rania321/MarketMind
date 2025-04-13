@@ -524,6 +524,39 @@ body {
     height: 300px;
     position: relative;
 }
+
+.topics-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.topics-section h3 {
+    margin-bottom: 20px;
+    color: var(--black);
+    text-align: center;
+}
+
+.topics-section .chart-container {
+    height: 300px;
+    position: relative;
+}
+/* Ajouter à la fin du fichier */
+.combined-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.combined-section h3 {
+    margin-bottom: 20px;
+    color: var(--black);
+    text-align: center;
+}
 /* Ajoutez ceci à la fin de style.css */
 #loadMoreReviews {
     width: 100%;
@@ -603,4 +636,199 @@ body {
     text-align: center;
     padding-top: 2rem;
     border-top: 1px solid #eee;
+}
+/* Ajoutez ces styles à la fin de style.css */
+
+/* Dashboard Styles */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.dashboard-header h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #333;
+}
+
+.dashboard-header h2 i {
+    margin-right: 10px;
+    color: var(--blue);
+}
+
+.form-inline {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.form-inline .form-group {
+    margin-bottom: 0;
+}
+
+.btn-small {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+/* KPI Cards */
+.kpi-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.kpi-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+}
+
+.kpi-card.total-reviews {
+    border-top: 4px solid var(--blue);
+}
+
+.kpi-card.sentiment-score {
+    border-top: 4px solid #4CAF50;
+}
+
+.kpi-card.response-rate {
+    border-top: 4px solid #FF9800;
+}
+
+.kpi-card.popular-topic {
+    border-top: 4px solid #9C27B0;
+}
+
+.kpi-icon {
+    font-size: 1.8rem;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.kpi-content h3 {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.kpi-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.kpi-trend {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.trend-up {
+    color: #4CAF50;
+}
+
+.trend-down {
+    color: #F44336;
+}
+
+.kpi-progress {
+    height: 6px;
+    background: #f0f0f0;
+    border-radius: 3px;
+    margin-top: 10px;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--blue);
+    width: 0%;
+    transition: width 1s ease;
+}
+
+.kpi-subtext {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+/* Dashboard Sections */
+.dashboard-section {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.dashboard-section h3 {
+    color: #444;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.dashboard-section h3 i {
+    margin-right: 10px;
+    color: var(--blue);
+}
+
+.grid-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* Wordcloud Container */
+.wordcloud-container {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .form-inline {
+        width: 100%;
+    }
+    
+    .grid-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .kpi-section {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .kpi-section {
+        grid-template-columns: 1fr;
+    }
 }

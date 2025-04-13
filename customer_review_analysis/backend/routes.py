@@ -207,7 +207,7 @@ def sentiment_analysis():
     
     if not product_id:
         return jsonify({"error": "Product ID is required"}), 400
-
+    
     # Récupérer tous les avis pour le produit spécifié
     reviews = list(reviews_collection.find({"product_id": product_id}))
 
@@ -344,6 +344,24 @@ def sentiment_analysis():
 
     return jsonify({"message": "Sentiment analysis completed", "sentiment_results": sentiment_results})
 
+@api_routes.route("/sentiment_results", methods=["GET"])
+def check_existing_analysis():
+    product_id = request.args.get("product_id")
+    if not product_id:
+        return jsonify({"error": "Product ID is required"}), 400
+    
+    # Rechercher toutes les analyses pour ce produit
+    existing_analyses = list(sentiment_results_collection.find({"product_id": ObjectId(product_id)}))
+    
+    if not existing_analyses:
+        return jsonify([]), 200
+    
+    # Convertir ObjectId en string pour le JSON
+    for analysis in existing_analyses:
+        analysis["_id"] = str(analysis["_id"])
+    
+    return jsonify(existing_analyses), 200
+
 @api_routes.route("/word_frequencies/<product_id>", methods=["GET"])
 def get_word_frequencies(product_id):
     # Récupérer les analyses de sentiment pour ce produit
@@ -459,110 +477,94 @@ def topic_classification():
     if not product_id:
         return jsonify({"error": "L'ID du produit est requis"}), 400
 
-    # Récupérer tous les avis pour le produit spécifié
-    reviews = list(reviews_collection.find({"product_id": product_id}))  # Correction: ajout de la parenthèse manquante
+    # Récupérer les analyses de sentiment existantes pour ce produit
+    sentiment_data = sentiment_results_collection.find_one(
+        {"product_id": ObjectId(product_id)},
+        sort=[("analysis_date", -1)]  # Prendre la plus récente
+    )
 
-    if not reviews:
-        return jsonify({"error": "Aucun avis trouvé pour ce produit"}), 404
+    if not sentiment_data:
+        return jsonify({"error": "Aucune analyse de sentiment trouvée pour ce produit"}), 404
 
     try:
-        # Trouver la date et heure les plus récentes
-        latest_datetime = max([datetime.strptime(review["date_added"], "%d-%m-%Y %H:%M:%S") for review in reviews])
-        latest_datetime_str = latest_datetime.strftime("%d-%m-%Y %H:%M:%S")
-
-        # Filtrer les avis pour ne garder que les plus récents
-        latest_reviews = [review for review in reviews if review["date_added"] == latest_datetime_str]
-
-        if not latest_reviews:
-            return jsonify({"error": "Aucun avis trouvé pour la date et heure les plus récentes"}), 404
-
-        # Liste pour stocker les résultats de classification
-        topic_results = []
-
-        # Vérifier si un document existe déjà pour ce produit et cette date
-        existing_document = topic_results_collection.find_one({
-            "product_id": ObjectId(product_id),
-            "date_added": latest_datetime_str
-        })
+        # Utiliser les mêmes avis que ceux analysés pour le sentiment
+        sentiment_analyses = sentiment_data.get("analyses", [])
+        
+        if not sentiment_analyses:
+            return jsonify({"error": "Aucun avis analysé trouvé"}), 404
 
         # Date d'analyse actuelle
         analysis_date = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+        
+        # Vérifier si un document thématique existe déjà pour cette analyse
+        existing_topic_doc = topic_results_collection.find_one({
+            "product_id": ObjectId(product_id),
+            "analysis_date": analysis_date
+        })
 
-        if existing_document:
-            # Si le document existe, ajouter les nouvelles analyses
-            for review in latest_reviews:
-                review_text = review["review_text"]
+        topic_results = []
 
-                # Vérifier si cet avis n'a pas encore été analysé
-                if not any(analysis.get("review_text") == review_text for analysis in existing_document.get("analyses", [])):
-                    # Effectuer la classification thématique
+        if existing_topic_doc:
+            # Si le document existe, vérifier les avis déjà analysés
+            existing_reviews = {a["review_text"] for a in existing_topic_doc.get("analyses", [])}
+            
+            new_analyses = []
+            for sa in sentiment_analyses:
+                if sa["review_text"] not in existing_reviews:
                     try:
-                        result = topic_classifier(review_text)
+                        # Classification thématique
+                        result = topic_classifier(sa["review_text"])
                         label_idx = int(result[0]['label'].split('_')[-1])
                         topic = topic_le.inverse_transform([label_idx])[0]
                         confidence = result[0]['score']
 
-                        # Mettre à jour le document
-                        topic_results_collection.update_one(
-                            {"_id": existing_document["_id"]},
-                            {
-                                "$push": {
-                                    "analyses": {
-                                        "review_text": review_text,
-                                        "topic": topic,
-                                        "confidence": float(confidence),  # Convertir en float pour MongoDB
-                                        "analysis_date": analysis_date,
-                                        "date_added": review["date_added"]
-                                    }
-                                }
-                            }
-                        )
-
-                        # Ajouter aux résultats
-                        topic_results.append({
-                            "review_text": review_text,
+                        new_analyses.append({
+                            "review_text": sa["review_text"],
                             "topic": topic,
                             "confidence": float(confidence),
                             "analysis_date": analysis_date,
-                            "date_added": review["date_added"]
+                            "date_added": sa["date_added"],
+                            "sentiment": sa.get("sentiment")  # Optionnel: stocker aussi le sentiment
                         })
                     except Exception as e:
-                        print(f"Erreur lors de la classification: {str(e)}")
+                        print(f"Erreur classification: {str(e)}")
                         continue
 
-        else:
-            # Si le document n'existe pas, en créer un nouveau
-            analyses = []
+            if new_analyses:
+                topic_results_collection.update_one(
+                    {"_id": existing_topic_doc["_id"]},
+                    {"$push": {"analyses": {"$each": new_analyses}}}
+                )
+                topic_results.extend(new_analyses)
 
-            for review in latest_reviews:
-                review_text = review["review_text"]
-                
+        else:
+            # Créer un nouveau document avec toutes les analyses
+            analyses = []
+            for sa in sentiment_analyses:
                 try:
-                    # Effectuer la classification thématique
-                    result = topic_classifier(review_text)
+                    result = topic_classifier(sa["review_text"])
                     label_idx = int(result[0]['label'].split('_')[-1])
                     topic = topic_le.inverse_transform([label_idx])[0]
                     confidence = result[0]['score']
 
                     analyses.append({
-                        "review_text": review_text,
+                        "review_text": sa["review_text"],
                         "topic": topic,
                         "confidence": float(confidence),
                         "analysis_date": analysis_date,
-                        "date_added": review["date_added"]
+                        "date_added": sa["date_added"],
+                        "sentiment": sa.get("sentiment")  # Optionnel
                     })
                 except Exception as e:
-                    print(f"Erreur lors de la classification: {str(e)}")
+                    print(f"Erreur classification: {str(e)}")
                     continue
 
-            # Créer un nouveau document seulement si on a des analyses valides
             if analyses:
                 topic_data = {
                     "product_id": ObjectId(product_id),
                     "analysis_date": analysis_date,
                     "analyses": analyses
                 }
-
                 topic_results_collection.insert_one(topic_data)
                 topic_results = analyses
 
@@ -645,3 +647,4 @@ def combined_sentiment_topic(product_id):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
