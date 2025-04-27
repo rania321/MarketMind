@@ -17,7 +17,23 @@ services:
       - DB_PASS=localdevpassword
     depends_on:
       - db
+  llama-backend:
+    build:
+      context: ./backend/ms-3
 
+    container_name: llama-container
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend/ms-3:/app # Mount current directory to /app in the container
+      - pip_cache:/tmp/pip_cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
   db:
     image: postgres:13-alpine
     volumes:
@@ -50,3 +66,4 @@ volumes:
   db-localdev-data:
   qdrant-data:
   mongo-data:
+  pip_cache:

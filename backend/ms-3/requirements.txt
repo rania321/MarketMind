@@ -2,4 +2,7 @@ flask
 flask-restful
 flask-jwt-extended
 pika  
-python-dotenv  
+python-dotenv
+torch
+transformers
+diffusers
