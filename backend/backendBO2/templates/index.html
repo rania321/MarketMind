@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Marketing Strategy Generator</title>
+    <style>
+        .strategy-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .strategy-section h4 { margin-top: 0; color: #2c3e50; }
+        ul { list-style-type: square; }
+    </style>
+</head>
+<body>
+    <h2>Smart Marketing Strategy Generator</h2>
+    <form method="post">
+        <label>Industry:</label>
+        <select name="industry">
+            <option>Food & Beverage</option>
+            <option>Fashion</option>
+            <option>Health</option>
+            <option>Tech</option>
+            <option>Education</option>
+        </select><br><br>
+
+        <label>Target Customer:</label>
+        <select name="target_customer">
+            <option>Young Professionals</option>
+            <option>Startups & SMEs</option>
+            <option>Women 25-40 years</option>
+        </select><br><br>
+
+        <label>Age Range:</label>
+        <select name="customer_age">
+            <option>18-35 years</option>
+            <option>25-50 years</option>
+            <option>25-40 years</option>
+            <option>50+ years</option>
+        </select><br><br>
+
+        <label>Marketing Budget:</label>
+        <input type="number" step="0.01" name="marketing_budget" required><br><br>
+
+        <input type="submit" value="Generate Strategy">
+    </form>
+
+    {% if prediction %}
+        <div class="results">
+            <h3>Predicted Strategy: {{ prediction }}</h3>
+            <p><strong>Trend used:</strong> {{ trend_used }}</p>
+            
+            {% if llm_strategy %}
+                <div class="llm-strategy">
+                    <h3>Detailed Marketing Plan</h3>
+                    {% for section, items in llm_strategy.items() %}
+                        <div class="strategy-section">
+                            <h4>{{ section|upper }}</h4>
+                            <ul>
+                                {% for item in items %}
+                                    <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</body>
+</html>
