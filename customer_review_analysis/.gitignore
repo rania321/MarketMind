@@ -1,5 +1,11 @@
 venv/
 __pycache__/
 *.pyc
+*.ipynb
 .DS_Store
 .env
+*.gguf
+models/
+uploads/images/
+*.jpg
+*.png
