@@ -12,7 +12,7 @@ async function fetchAPI(endpoint, options = {}) {
   })
 
   if (!response.ok) {
-    const error = await response.json()
+    const error = await response.json().catch(() => ({ error: "Une erreur est survenue" }))
     throw new Error(error.error || "Une erreur est survenue")
   }
 
@@ -48,4 +48,6 @@ export default {
     }),
   getWordFrequencies: (productId) => fetchAPI(`word_frequencies/${productId}`),
   getSentimentTrends: (productId) => fetchAPI(`sentiment_trends/${productId}`),
+  getTopicDistribution: (productId) => fetchAPI(`topic_distribution/${productId}`),
+  getCombinedSentimentTopic: (productId) => fetchAPI(`combined_sentiment_topic/${productId}`),
 }
