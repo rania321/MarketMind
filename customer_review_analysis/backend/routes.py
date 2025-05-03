@@ -17,6 +17,7 @@ import os
 import re
 import pandas as pd
 import torch
+from func_timeout import func_timeout, FunctionTimedOut  # Add this import
 from transformers import (
     AutoModelForSequenceClassification, 
     AutoTokenizer,
@@ -27,10 +28,13 @@ from config import (
     products_collection, 
     reviews_collection, 
     sentiment_results_collection,
-    topic_results_collection,  # Nouvelle collection ajoutée
+    topic_results_collection,
+    summary_results_collection,  # Add this
     IMAGE_FOLDER, 
     CSV_FOLDER
 )
+from models import SummaryModel
+import logging
 
 api_routes = Blueprint('api_routes', __name__)
 
@@ -57,6 +61,14 @@ topic_classifier = pipeline(
 topic_classes = ['price', 'service', 'quality', 'delivery']
 topic_le = LabelEncoder()
 topic_le.fit(topic_classes)
+
+# Initialize with error handling
+try:
+    summary_model = SummaryModel()
+    logging.info("Summary model loaded successfully")
+except Exception as e:
+    logging.error(f"Failed to load summary model: {str(e)}")
+    summary_model = None
 
 print("Tous les modèles et tokenizers ont été chargés avec succès")
 
@@ -659,3 +671,138 @@ def combined_sentiment_topic(product_id):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+
+@api_routes.route("/generate_summary", methods=["POST"])
+def generate_summary():
+    product_id = request.form.get("product_id")
+    if not product_id:
+        return jsonify({"error": "Product ID is required"}), 400
+
+    try:
+        # Get latest sentiment analysis
+        sentiment_data = sentiment_results_collection.find_one(
+            {"product_id": ObjectId(product_id)},
+            sort=[("analysis_date", -1)]
+        )
+        if not sentiment_data:
+            return jsonify({"error": "No sentiment data found"}), 404
+
+        # Get product name
+        product = products_collection.find_one({"_id": ObjectId(product_id)})
+        sentiment_data['product_name'] = product.get("name", "Unknown Product")
+
+        # Generate summary
+        result = summary_model.generate_summary(sentiment_data)
+        if result.get("status") != "success":
+            return jsonify(result), 400
+
+        # Save to database
+        summary_data = {
+            "product_id": ObjectId(product_id),
+            "product_name": sentiment_data['product_name'],
+            "summary": result["summary"],
+            "input_prompt": result.get("input_data", ""),
+            "generated_at": datetime.now()
+        }
+        summary_results_collection.insert_one(summary_data)
+
+        return jsonify({
+            "success": True,
+            "summary": result["summary"],
+            "prompt": result.get("input_data", "")
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
+
+@api_routes.route("/generate_recommendations", methods=["POST"])
+def generate_recommendations():
+    print("\n--- Generate Recommendations Endpoint Hit ---")
+    product_id = request.form.get("product_id")
+    
+    if not product_id:
+        return jsonify({"error": "Product ID is required"}), 400
+    
+    if not summary_model or not summary_model.model_loaded:
+        logging.error("Summary model not initialized or not loaded")
+        return jsonify({"error": "Summary model not initialized or not loaded"}), 500
+    
+    try:
+        # Get sentiment data
+        sentiment_data = sentiment_results_collection.find_one(
+            {"product_id": ObjectId(product_id)},
+            sort=[("analysis_date", -1)]
+        )
+        if not sentiment_data:
+            return jsonify({"error": "No sentiment analysis found for this product"}), 404
+        
+        # Get product name
+        product = products_collection.find_one({"_id": ObjectId(product_id)})
+        product_name = product.get("name", "Unknown Product") if product else "Unknown Product"
+        
+        # Format the data for the model
+        formatted_data = {
+            "product_name": product_name,
+            "analyses": sentiment_data.get("analyses", [])
+        }
+        
+        # Generate recommendations using the correct method
+        result = summary_model.generate_recommendations(formatted_data)
+        
+        if result.get("status") != "success":
+            return jsonify(result), 400
+        
+        # Save to database
+        summary_data = {
+            "product_id": ObjectId(product_id),
+            "product_name": product_name,
+            "recommendations": result["recommendations"],
+            "analysis_date": datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
+            "generated_at": datetime.now()
+        }
+        summary_results_collection.insert_one(summary_data)
+        
+        return jsonify({
+            "success": True,
+            "recommendations": result["recommendations"]
+        })
+        
+    except Exception as e:
+        logging.error(f"Unexpected error in recommendations generation: {str(e)}")
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+    
+@api_routes.route("/get_summaries/<product_id>", methods=["GET"])
+def get_summaries(product_id):
+    try:
+        # Validate product_id format
+        if not ObjectId.is_valid(product_id):
+            return jsonify({"error": "Invalid product ID format"}), 400
+            
+        summaries = list(summary_results_collection.find(
+            {"product_id": ObjectId(product_id)},
+            sort=[("generated_at", -1)]  # Sort by generation date
+        ).limit(10))  # Limit to 10 most recent
+        
+        if not summaries:
+            return jsonify([]), 200
+            
+        # Convert ObjectId and dates
+        for summary in summaries:
+            summary["_id"] = str(summary["_id"])
+            if "source_analysis_id" in summary:
+                summary["source_analysis_id"] = str(summary["source_analysis_id"])
+            
+        return jsonify(summaries)
+        
+    except Exception as e:
+        logging.error(f"Failed to fetch summaries: {str(e)}")
+        return jsonify({
+            "error": "Failed to retrieve summaries",
+            "details": str(e)
+        }), 500

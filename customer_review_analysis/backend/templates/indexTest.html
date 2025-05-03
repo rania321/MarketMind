@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test du Modèle d'Analyse</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        .options {
+            margin: 15px 0;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border-left: 4px solid #4CAF50;
+            display: none;
+        }
+        .loading {
+            display: none;
+            margin-top: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test du Modèle d'Analyse</h1>
+        
+        <div>
+            <label for="reviewText">Entrez votre texte à analyser:</label>
+            <textarea id="reviewText" placeholder="Saisissez ici les avis clients à analyser..."></textarea>
+        </div>
+        
+        <div class="options">
+            <strong>Type d'analyse:</strong><br>
+            <input type="radio" id="summary" name="analysisType" value="summary" checked>
+            <label for="summary">Résumé</label><br>
+            
+            <input type="radio" id="recommendations" name="analysisType" value="recommendations">
+            <label for="recommendations">Recommandations</label><br>
+            
+            <input type="radio" id="insights" name="analysisType" value="insights">
+            <label for="insights">Analyse approfondie</label>
+        </div>
+        
+        <button onclick="analyzeText()">Analyser</button>
+        
+        <div class="loading" id="loadingIndicator">
+            Analyse en cours, veuillez patienter...
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        function analyzeText() {
+            const text = document.getElementById('reviewText').value;
+            const analysisType = document.querySelector('input[name="analysisType"]:checked').value;
+            const resultDiv = document.getElementById('result');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            
+            if (!text) {
+                alert("Veuillez entrer un texte à analyser");
+                return;
+            }
+            
+            // Afficher l'indicateur de chargement
+            loadingIndicator.style.display = 'block';
+            resultDiv.style.display = 'none';
+            
+            // Envoyer la requête à l'API
+            fetch('http://localhost:5000/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text: text,
+                    type: analysisType
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingIndicator.style.display = 'none';
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<h3>Résultat de l'analyse (${analysisType}):</h3><p>${data.result}</p>`;
+                    resultDiv.style.display = 'block';
+                } else {
+                    alert("Erreur: " + (data.error || "Une erreur est survenue"));
+                }
+            })
+            .catch(error => {
+                loadingIndicator.style.display = 'none';
+                alert("Erreur de connexion: " + error.message);
+            });
+        }
+    </script>
+</body>
+</html>

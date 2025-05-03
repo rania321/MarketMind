@@ -13,10 +13,11 @@ products_collection = db["products"]
 reviews_collection = db["reviews"]
 sentiment_results_collection = db["sentiment_results"]
 topic_results_collection = db["topic_results"]
-summary_results_collection = db["summary_results"]
+summary_results_collection = db["summary_results"]  
+
 
 # Configuration des dossiers
-UPLOAD_FOLDER = "backend/uploads"
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "uploads")
 IMAGE_FOLDER = os.path.join(UPLOAD_FOLDER, "images")
 CSV_FOLDER = os.path.join(UPLOAD_FOLDER, "csv")
 
