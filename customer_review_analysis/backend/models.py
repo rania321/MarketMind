@@ -147,7 +147,7 @@ class SummaryModel:
     def load_model(self):
         """Charge le modèle depuis HuggingFace Hub ou le cache local"""
         try:
-            login(token="##")
+            login(token="##YOUR_HUGGINGFACE_TOKEN##")   
             api = HfApi()
             repo_files = api.list_repo_files("Nourhen2001/ReviewLlama_Sum_Req_gguf")
             gguf_files = [f for f in repo_files if f.endswith('.gguf')]

@@ -40,14 +40,26 @@ api_routes = Blueprint('api_routes', __name__)
 
 # Modèle d'analyse de sentiment
 sentiment_model_name = "Nourhen2001/fine-tuned-bert-sentiment-v1"
-sentiment_model = AutoModelForSequenceClassification.from_pretrained(sentiment_model_name)
-sentiment_tokenizer = AutoTokenizer.from_pretrained(sentiment_model_name)
+sentiment_model = AutoModelForSequenceClassification.from_pretrained(
+    sentiment_model_name,
+    cache_dir="models"
+)
+sentiment_tokenizer = AutoTokenizer.from_pretrained(
+    sentiment_model_name,
+    cache_dir="models"
+)
 
 print("Le modèle et le tokenizer ont été chargés avec succès.")
 # Modèle de classification thématique
 topic_model_name = "Nourhen2001/camembert-base-Topic-v1"
-topic_model = AutoModelForSequenceClassification.from_pretrained(topic_model_name)
-topic_tokenizer = CamembertTokenizer.from_pretrained(topic_model_name)
+topic_model = AutoModelForSequenceClassification.from_pretrained(
+    topic_model_name,
+    cache_dir="models"
+)
+topic_tokenizer = CamembertTokenizer.from_pretrained(
+    topic_model_name,
+    cache_dir="models"
+)
 
 # Création du pipeline de classification thématique
 topic_classifier = pipeline(
