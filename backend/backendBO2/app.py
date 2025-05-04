@@ -10,7 +10,7 @@ from flask_cors import CORS
 from flask import send_from_directory
 import os
 
-app = Flask(__name__, static_folder='../frontend/build')
+app = Flask(__name__, static_folder='../../frontend/build')
 
 # Initialiser l'application Flask
 #app = Flask(__name__)
