@@ -3,7 +3,7 @@ from routes import api_routes
 import os
 from flask_cors import CORS
 
-app = Flask(__name__, static_folder='../frontend')
+app = Flask(__name__, static_folder='..../../frontend') 
 CORS(app)  # Enable CORS for all routes
 
 # Register Blueprint
@@ -18,12 +18,12 @@ def serve_image(filename):
 # Serve frontend
 @app.route('/')
 def serve_frontend():
-    return send_from_directory('../frontend', 'homeAnalyseBO1.html')
+    return send_from_directory('../../frontend', 'homeAnalyseBO1.html')
 
 # Serve static files
 @app.route('/<path:path>')
 def serve_static(path):
-    return send_from_directory('../frontend', path)
+    return send_from_directory('../../frontend', path)
 
 if __name__ == "__main__":
     app.run(debug=True)
