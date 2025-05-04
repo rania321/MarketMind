@@ -50,4 +50,22 @@ export default {
   getSentimentTrends: (productId) => fetchAPI(`sentiment_trends/${productId}`),
   getTopicDistribution: (productId) => fetchAPI(`topic_distribution/${productId}`),
   getCombinedSentimentTopic: (productId) => fetchAPI(`combined_sentiment_topic/${productId}`),
+
+  // Ajout des méthodes pour l'IA
+  generateSummary: (productId) =>
+    fetchAPI("generate_summary", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ product_id: productId }),
+    }),
+  generateRecommendations: (productId) =>
+    fetchAPI("generate_recommendations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ product_id: productId }),
+    }),
 }

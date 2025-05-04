@@ -6,6 +6,7 @@ import ReviewsPage from "./pages/ReviewsPage"
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import { AuthProvider } from "./context/AuthContext"; 
+import AnalysisPage from "./pages/AnalysisPage";
 
 
 function App() {
@@ -19,6 +20,9 @@ function App() {
             <Route index element={<HomePage />} />
             <Route path="products" element={<ProductsPage />} />
             <Route path="reviews" element={<ReviewsPage />} />
+            <Route path="analysis"element={<AnalysisPage />
+               }
+            />
           </Route>
         </Routes>
       </Router>
