@@ -1,48 +1,77 @@
-"use client"
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { loginUser, logoutUser, getUser, resendVerificationEmail, confirmEmail, registerUser } from '../api';
 
-import { createContext, useState, useEffect, useContext } from "react"
-
-const AuthContext = createContext(null)
+const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in from localStorage
-    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true"
-    const userData = localStorage.getItem("user")
+    const checkUser = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const userData = await getUser();
+          setUser(userData);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la vérification de l\'utilisateur :', error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkUser();
+  }, []);
 
-    if (isLoggedIn && userData) {
-      setCurrentUser(JSON.parse(userData))
+  const login = async (credentials) => {
+    try {
+      const loginResponse = await loginUser(credentials);
+      console.log('Réponse login :', loginResponse);
+      const userData = await getUser();
+      console.log('Données utilisateur :', userData);
+      setUser(userData);
+    } catch (error) {
+      console.error('Erreur de connexion :', error);
+      throw error;
     }
+  };
 
-    setLoading(false)
-  }, [])
+  const logout = async () => {
+    await logoutUser();
+    setUser(null);
+  };
 
-  const login = (userData) => {
-    localStorage.setItem("isLoggedIn", "true")
-    localStorage.setItem("user", JSON.stringify(userData))
-    setCurrentUser(userData)
-  }
+  const resendEmail = async (email) => {
+    await resendVerificationEmail({ email });
+  };
 
-  const logout = () => {
-    localStorage.removeItem("isLoggedIn")
-    localStorage.removeItem("user")
-    setCurrentUser(null)
-  }
+  const confirmEmailAction = async (key) => {
+    await confirmEmail(key);
+    const userData = await getUser();
+    setUser(userData);
+  };
 
-  const value = {
-    currentUser,
-    login,
-    logout,
-    isAuthenticated: !!currentUser,
-  }
+  // Ajoutez la fonction register ici
+  const register = async (data) => {
+    try {
+      const response = await registerUser(data);
+      console.log('Réponse inscription :', response);
+      return response;
+    } catch (error) {
+      console.error('Erreur inscription :', error);
+      throw error;
+    }
+  };
 
-  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>
-}
+  return (
+    <AuthContext.Provider value={{ user, login, logout, resendEmail, confirmEmailAction, register, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
-export const useAuth = () => {
-  return useContext(AuthContext)
-}
-
+export const useAuth = () => useContext(AuthContext);

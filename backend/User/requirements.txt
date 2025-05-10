@@ -4,3 +4,4 @@ djangorestframework
 dj-rest-auth[with_social]
 drf-spectacular
 djangorestframework-simplejwt
+django-cors-headers
