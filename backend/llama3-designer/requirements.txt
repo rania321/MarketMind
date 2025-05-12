@@ -1,0 +1,6 @@
+flask
+flask-restful
+flask-jwt-extended
+pika  
+python-dotenv  
+llama-cpp-python

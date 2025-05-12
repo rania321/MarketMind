@@ -1,0 +1,9 @@
+flask
+flask-restful
+flask-jwt-extended
+pika  
+python-dotenv  
+uvicorn
+langchain
+requests
+pillow
