@@ -33,6 +33,7 @@ class CustomRegisterSerializer(RegisterSerializer):
     """Custom serializer for user registration."""
 
     name = serializers.CharField(max_length=255)
+    username = None
 
     # Define transaction.atomic to rollback the save operation in case of error
     @transaction.atomic

@@ -25,12 +25,13 @@ SECRET_KEY = 'django-insecure-d_80bx&6465!95xyj(585ekh&m8z_29oh2^)mb6069g5h-kwut
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -68,7 +70,7 @@ ROOT_URLCONF = 'app.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -80,6 +82,10 @@ TEMPLATES = [
         },
     },
 ]
+
+ACCOUNT_EMAIL_CONFIRMATION_URL = "http://127.0.0.1:5000/verify-email/{key}"
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = "http://127.0.0.1:5000/login"
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "http://127.0.0.1:5000/login"
 
 WSGI_APPLICATION = 'app.wsgi.application'
 
@@ -94,6 +100,7 @@ DATABASES = {
         'NAME': os.environ.get("DB_NAME"),
         'USER': os.environ.get("DB_USER"),
         'PASSWORD': os.environ.get("DB_PASS"),
+        'PORT': '5432',
     }
 }
 
@@ -151,6 +158,10 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "dj_rest_auth.jwt_auth.JWTCookieAuthentication",
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
     ],
 }
 REST_AUTH = {
@@ -172,3 +183,8 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "ahmed.tahri702@gmail.com"
 EMAIL_HOST_PASSWORD = "qabx xrqo nffy xkhy"  
 DEFAULT_FROM_EMAIL = "ahmed.tahri702@gmail.com"
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    'http://localhost:5000',
+    'http://127.0.0.1:5000',
+]

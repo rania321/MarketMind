@@ -38,9 +38,9 @@ function Header() {
                 <ul className="nav">
                 <li className="scroll-to-section"><a href="#top" className="active">Home</a></li>
                 <li className="scroll-to-section"><a href="#about">About Us</a></li>
-                <li className="scroll-to-section"><a href="#services">Services</a></li>
-                <li className="scroll-to-section"><a href="#portfolio">Portfolio</a></li>
-                <li className="scroll-to-section"><a href="#blog">Blog</a></li> 
+                
+                <li className="scroll-to-section"><a href="#portfolio">Services</a></li>
+                {/* <li className="scroll-to-section"><a href="#blog">Blog</a></li>  */}
                 <li className="scroll-to-section"><a href="#contact">Message Us</a></li> 
                 <li className="scroll-to-section"><div className="main-red-button"><a href="#contact">Contact Now</a></div></li> 
                 </ul>        

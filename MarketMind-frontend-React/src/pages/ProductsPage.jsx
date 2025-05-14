@@ -9,6 +9,8 @@ import Loader from "../components/common/Loader"
 import EmptyState from "../components/common/EmptyState"
 import { FiPackage, FiPlus, FiList, FiSearch, FiFilter, FiArrowUp, FiArrowDown, FiCalendar } from "react-icons/fi"
 import "../styles/products.css"
+import { useNavigate } from "react-router-dom" 
+
 
 const sortOptions = [
   { value: "name-asc", label: "Name (A-Z)", icon: <FiArrowUp /> },
@@ -47,7 +49,8 @@ function ProductsPage() {
     currentPage,
     itemsPerPage
   } = state
-
+  
+  const navigate = useNavigate()
   const loadProducts = useCallback(async () => {
     try {
       const data = await api.getProducts()
@@ -145,6 +148,14 @@ function ProductsPage() {
             <span className="total-products">
               {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'} found
             </span>
+           
+            <button 
+  className="add-review-button mt-4"
+  onClick={() => navigate('/reviews')}
+>
+  <FiPlus className="icon" /> Add Review
+</button>
+
           </div>
         </div>
 
