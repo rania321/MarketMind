@@ -1,0 +1,7 @@
+{
+  "error": "415 Unsupported Media Type: Did not attempt to load JSON data because the request Content-Type was not 'application/json'."
+}
+--_curl_--"industry": "Food & Beverage"
+--_curl_-- "target_customer": "Startups et PME"
+--_curl_-- "customer_age": "25-50 ans"
+--_curl_-- "marketing_budget": 45255

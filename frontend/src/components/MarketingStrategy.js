@@ -4,8 +4,8 @@ import { predictStrategy } from '../api';
 const MarketingStrategy = () => {
   const [formData, setFormData] = useState({
     industry: 'Food & Beverage',
-    target_customer: 'Young Professionals',
-    customer_age: '18-35 years',
+    target_customer: 'Jeunes professionnels',
+    customer_age: '18-35 ans',  // Updated to match training data
     marketing_budget: 0
   });
 
@@ -19,13 +19,7 @@ const MarketingStrategy = () => {
     setError(null);
     
     try {
-      const payload = {
-        ...formData,
-        customer_age: formData.customer_age.replace('years', 'ans').replace('-', '-'),
-        target_customer: formData.target_customer.replace('Women', 'Femmes')
-      };
-      
-      const response = await predictStrategy(payload);
+      const response = await predictStrategy(formData);  // Send formData directly, no transformation needed
       setResults(response.data);
     } catch (err) {
       setError(err.response?.data?.error || 'Erreur lors de la génération de la stratégie');
@@ -72,7 +66,7 @@ const MarketingStrategy = () => {
                     onChange={(e) => setFormData({...formData, target_customer: e.target.value})}
                     className="form-select"
                   >
-                    {['Young Professionals', 'Startups & SMEs', 'Women 25-40 years'].map(option => (
+                    {['Femmes 25-40 ans', 'Jeunes professionnels', 'Startups et PME'].map(option => (
                       <option key={option} value={option}>{option}</option>
                     ))}
                   </select>
@@ -86,7 +80,7 @@ const MarketingStrategy = () => {
                     onChange={(e) => setFormData({...formData, customer_age: e.target.value})}
                     className="form-select"
                   >
-                    {['18-35 years', '25-50 years', '25-40 years', '50+ years'].map(option => (
+                    {['18-35 ans', '25-50 ans'].map(option => (  // Updated to match training data
                       <option key={option} value={option}>{option}</option>
                     ))}
                   </select>

@@ -4,7 +4,6 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
 });
-
 // URL spécifique pour l'authentification (Django API)
 const AUTH_API_URL = 'http://127.0.0.1:8000/api/v1/dj-rest-auth/';
 
