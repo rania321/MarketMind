@@ -1,0 +1,4 @@
+*.gguf
+models/
+__pycache__/
+*.whl
