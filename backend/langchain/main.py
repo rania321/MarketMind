@@ -10,8 +10,10 @@ import threading
 import logging
 import time
 import re
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 logging.basicConfig(level=logging.INFO)
 
 # RabbitMQ host and JWT secret
@@ -136,7 +138,7 @@ def process_llama_response():
     
     parsed = parse_llama_response(response_text)
     logging.info(f"Parsed Llama3 response: {parsed}")
-    frontend_queue = f'user_{user_id}_frontend'
+    frontend_queue = f'user_123_frontend'
     
     connection = get_connection()
     channel = connection.channel()
@@ -195,7 +197,7 @@ def check_and_send_to_stablediffusion():
 # Send audio to user
 def send_audio_to_user():
     user_id = audio_response.get('id', '')
-    frontend_queue = f'user_{user_id}_frontend'
+    frontend_queue = f'user_123_frontend'
     
     connection = get_connection()
     channel = connection.channel()
@@ -207,7 +209,7 @@ def send_audio_to_user():
 # Send image to user
 def send_image_to_user(image_data):
     user_id = llama_response.get('id', '') or u2net_response.get('id', '')
-    frontend_queue = f'user_{user_id}_frontend'
+    frontend_queue = f'user_123_frontend'
     
     connection = get_connection()
     channel = connection.channel()
